@@ -40,7 +40,7 @@ export default function CollectorHomeScreen() {
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.logo}>🌱 WasteWise</Text>
+          <Text style={styles.logo}>🌿 Borlawura</Text>
           <Text style={styles.subtitle}>Collector</Text>
         </View>
         <TouchableOpacity

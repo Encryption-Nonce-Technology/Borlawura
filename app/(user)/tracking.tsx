@@ -165,7 +165,7 @@ export default function TrackingScreen() {
             </View>
             <Text style={styles.completedTitle}>Pickup Completed!</Text>
             <Text style={styles.completedText}>
-              Thank you for using WasteWise. Your waste has been collected successfully.
+              Thank you for using Borlawura. Your waste has been collected successfully.
             </Text>
           </View>
         )}

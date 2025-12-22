@@ -26,7 +26,7 @@ export default function RoleSelectorScreen() {
 
       <SafeAreaView style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.logo}>🌱 WasteWise</Text>
+          <Text style={styles.logo}>🌿 Borlawura</Text>
           <Text style={styles.tagline}>Snap it. Request it. It&apos;s gone.</Text>
         </View>
 

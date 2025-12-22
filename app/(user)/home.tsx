@@ -108,7 +108,7 @@ export default function UserHomeScreen() {
       <SafeAreaView style={styles.overlay} edges={["top"]}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>🌱 WasteWise</Text>
+            <Text style={styles.logoText}>🌿 Borlawura</Text>
           </View>
           <TouchableOpacity
             style={styles.profileButton}
