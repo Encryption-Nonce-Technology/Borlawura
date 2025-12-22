@@ -64,8 +64,8 @@ export default function TrashDetailsScreen() {
         console.error("Error getting location:", error);
         setLocation({
           coords: {
-            latitude: 5.6037,
-            longitude: -0.1870,
+            latitude: -1.2921,
+            longitude: 36.8219,
             altitude: null,
             accuracy: null,
             altitudeAccuracy: null,
@@ -74,7 +74,7 @@ export default function TrashDetailsScreen() {
           },
           timestamp: Date.now(),
         });
-        setAddress("Accra, Ghana");
+        setAddress("Nairobi, Kenya");
       }
     })();
   }, []);
@@ -165,7 +165,7 @@ export default function TrashDetailsScreen() {
                 <Text style={styles.quantityLabel}>{qty.label}</Text>
                 <Text style={styles.quantityDescription}>{qty.description}</Text>
               </View>
-              <Text style={styles.quantityPrice}>₵{qty.price}</Text>
+              <Text style={styles.quantityPrice}>KSh {qty.price}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -184,7 +184,7 @@ export default function TrashDetailsScreen() {
       <View style={styles.footer}>
         <View style={styles.priceContainer}>
           <Text style={styles.priceLabel}>Estimated Cost</Text>
-          <Text style={styles.priceValue}>₵{selectedPrice}</Text>
+          <Text style={styles.priceValue}>KSh {selectedPrice}</Text>
         </View>
         <TouchableOpacity
           testID="confirm-button"
