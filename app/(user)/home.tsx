@@ -6,6 +6,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from "react
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import Colors, { Brand } from "@/constants/colors";
+
 export default function UserHomeScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [hasPermission, setHasPermission] = useState<boolean>(false);
@@ -108,14 +110,14 @@ export default function UserHomeScreen() {
       <SafeAreaView style={styles.overlay} edges={["top"]}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>🌱 WasteWise</Text>
+            <Text style={styles.logoText}>🌱 {Brand.appName}</Text>
           </View>
           <TouchableOpacity
             style={styles.profileButton}
             onPress={() => router.push("/" as any)}
             testID="profile-button"
           >
-            <User size={24} color="#10B981" />
+            <User size={24} color={Colors.light.primary} />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -160,7 +162,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: "#6B7280",
+    color: Colors.light.muted,
   },
   overlay: {
     position: "absolute",
@@ -176,7 +178,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   logoContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.card,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 12,
@@ -189,13 +191,13 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
   },
   profileButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.card,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -215,7 +217,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   infoCard: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.card,
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -228,22 +230,22 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
     marginBottom: 8,
   },
   infoText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: Colors.light.muted,
     lineHeight: 20,
   },
   requestButton: {
-    backgroundColor: "#10B981",
+    backgroundColor: Colors.light.primary,
     borderRadius: 16,
     paddingVertical: 18,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#10B981",
+    shadowColor: Colors.light.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,

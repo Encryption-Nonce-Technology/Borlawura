@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import Colors, { Brand } from "@/constants/colors";
 import { trpc } from "@/lib/trpc";
 
 export default function CollectorHomeScreen() {
@@ -40,7 +41,7 @@ export default function CollectorHomeScreen() {
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.logo}>🌱 WasteWise</Text>
+          <Text style={styles.logo}>🌱 {Brand.appName}</Text>
           <Text style={styles.subtitle}>Collector</Text>
         </View>
         <TouchableOpacity
@@ -133,7 +134,10 @@ export default function CollectorHomeScreen() {
                           {request.trashType.charAt(0).toUpperCase() + request.trashType.slice(1)}
                         </Text>
                       </View>
-                      <Text style={styles.priceText}>₵{request.price}</Text>
+                      <Text style={styles.priceText}>
+                        {Brand.currency.symbol}
+                        {request.price}
+                      </Text>
                     </View>
 
                     <View style={styles.requestLocation}>
@@ -176,18 +180,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.card,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: Colors.light.border,
   },
   logo: {
     fontSize: 24,
     fontWeight: "700" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
   },
   subtitle: {
     fontSize: 14,
-    color: "#6B7280",
+    color: Colors.light.muted,
     marginTop: 2,
   },
   walletButton: {
@@ -202,7 +206,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.card,
     marginHorizontal: 20,
     marginTop: 16,
     padding: 16,
@@ -225,7 +229,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   statusOnline: {
-    backgroundColor: "#10B981",
+    backgroundColor: Colors.light.primary,
   },
   statusOffline: {
     backgroundColor: "#9CA3AF",
@@ -233,12 +237,12 @@ const styles = StyleSheet.create({
   statusLabel: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
     marginBottom: 2,
   },
   statusDescription: {
     fontSize: 14,
-    color: "#6B7280",
+    color: Colors.light.muted,
   },
   toggleButton: {
     width: 56,
@@ -253,7 +257,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   toggleButtonOn: {
-    backgroundColor: "#10B981",
+    backgroundColor: Colors.light.primary,
   },
   toggleButtonOff: {
     backgroundColor: "#E5E7EB",
@@ -265,7 +269,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "700" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
     marginBottom: 16,
   },
   requestsList: {
@@ -283,17 +287,17 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: "600" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: Colors.light.muted,
     textAlign: "center",
     lineHeight: 20,
   },
   requestCard: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.card,
     borderRadius: 16,
     marginBottom: 16,
     overflow: "hidden",
@@ -336,12 +340,12 @@ const styles = StyleSheet.create({
   trashTypeText: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
   },
   priceText: {
     fontSize: 20,
     fontWeight: "700" as const,
-    color: "#10B981",
+    color: Colors.light.primary,
   },
   requestLocation: {
     flexDirection: "row",
@@ -352,7 +356,7 @@ const styles = StyleSheet.create({
   locationText: {
     flex: 1,
     fontSize: 14,
-    color: "#6B7280",
+    color: Colors.light.muted,
   },
   requestFooter: {
     flexDirection: "row",
@@ -373,7 +377,7 @@ const styles = StyleSheet.create({
   viewButtonText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#10B981",
+    color: Colors.light.primary,
   },
   offlineState: {
     alignItems: "center",
@@ -386,6 +390,6 @@ const styles = StyleSheet.create({
   },
   offlineText: {
     fontSize: 16,
-    color: "#6B7280",
+    color: Colors.light.muted,
   },
 });

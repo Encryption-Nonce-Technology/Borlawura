@@ -1,13 +1,17 @@
 import { router } from "expo-router";
 import { Truck, Package } from "lucide-react-native";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import Colors, { Brand } from "@/constants/colors";
 
 const { width } = Dimensions.get("window");
 
 export default function RoleSelectorScreen() {
   const [selectedRole, setSelectedRole] = useState<"user" | "collector" | null>(null);
+
+  const currencySymbol = useMemo(() => Brand.currency.symbol, []);
 
   const handleContinue = () => {
     if (selectedRole === "user") {
@@ -26,8 +30,8 @@ export default function RoleSelectorScreen() {
 
       <SafeAreaView style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.logo}>🌱 Borlawura</Text>
-          <Text style={styles.tagline}>Snap it. Request it. It&apos;s gone.</Text>
+          <Text style={styles.logo}>🌱 {Brand.appName}</Text>
+          <Text style={styles.tagline}>{Brand.tagline}</Text>
         </View>
 
         <View style={styles.rolesContainer}>
@@ -66,7 +70,9 @@ export default function RoleSelectorScreen() {
             </View>
             <View style={styles.roleInfo}>
               <Text style={styles.roleTitle}>I am a collector</Text>
-              <Text style={styles.roleDescription}>Accept requests and earn money collecting waste</Text>
+              <Text style={styles.roleDescription}>
+                Accept requests and earn {currencySymbol} collecting waste
+              </Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -88,7 +94,7 @@ export default function RoleSelectorScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.background,
   },
   background: {
     position: "absolute",
@@ -100,7 +106,7 @@ const styles = StyleSheet.create({
     width: width * 1.5,
     height: width * 1.5,
     borderRadius: (width * 1.5) / 2,
-    backgroundColor: "#10B981",
+    backgroundColor: Colors.light.primary,
     opacity: 0.05,
     top: -width * 0.7,
     left: -width * 0.3,
@@ -110,7 +116,7 @@ const styles = StyleSheet.create({
     width: width * 1.2,
     height: width * 1.2,
     borderRadius: (width * 1.2) / 2,
-    backgroundColor: "#059669",
+    backgroundColor: Colors.light.primaryDark,
     opacity: 0.05,
     bottom: -width * 0.6,
     right: -width * 0.3,
@@ -128,12 +134,12 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 36,
     fontWeight: "700" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
     marginBottom: 8,
   },
   tagline: {
     fontSize: 16,
-    color: "#6B7280",
+    color: Colors.light.muted,
     fontWeight: "500" as const,
   },
   rolesContainer: {
@@ -144,19 +150,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "700" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
     marginBottom: 32,
     textAlign: "center",
   },
   roleCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.card,
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
     borderWidth: 2,
-    borderColor: "#E5E7EB",
+    borderColor: Colors.light.border,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -164,7 +170,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   roleCardActive: {
-    borderColor: "#10B981",
+    borderColor: Colors.light.primary,
     backgroundColor: "#ECFDF5",
   },
   iconContainer: {
@@ -177,7 +183,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   iconContainerActive: {
-    backgroundColor: "#10B981",
+    backgroundColor: Colors.light.primary,
   },
   roleInfo: {
     flex: 1,
@@ -185,20 +191,20 @@ const styles = StyleSheet.create({
   roleTitle: {
     fontSize: 18,
     fontWeight: "600" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
     marginBottom: 4,
   },
   roleDescription: {
     fontSize: 14,
-    color: "#6B7280",
+    color: Colors.light.muted,
     lineHeight: 20,
   },
   button: {
-    backgroundColor: "#10B981",
+    backgroundColor: Colors.light.primary,
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: "center",
-    shadowColor: "#10B981",
+    shadowColor: Colors.light.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

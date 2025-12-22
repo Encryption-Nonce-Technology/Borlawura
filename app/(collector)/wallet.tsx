@@ -2,6 +2,8 @@ import { TrendingUp, DollarSign, Calendar, CheckCircle } from "lucide-react-nati
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import Colors, { Brand } from "@/constants/colors";
+
 const mockEarnings = [
   { id: "1", amount: 300, date: "Today, 2:30 PM", type: "Bin collection", status: "completed" },
   { id: "2", amount: 150, date: "Today, 11:15 AM", type: "Sack collection", status: "completed" },
@@ -21,12 +23,18 @@ export default function WalletScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>Available Balance</Text>
-          <Text style={styles.balanceAmount}>₵{totalEarnings.toLocaleString()}</Text>
+          <Text style={styles.balanceAmount}>
+            {Brand.currency.symbol}
+            {totalEarnings.toLocaleString()}
+          </Text>
 
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <TrendingUp size={20} color="#10B981" />
-              <Text style={styles.statValue}>₵{todayEarnings}</Text>
+              <Text style={styles.statValue}>
+                {Brand.currency.symbol}
+                {todayEarnings}
+              </Text>
               <Text style={styles.statLabel}>Today</Text>
             </View>
             <View style={styles.statDivider} />
@@ -59,7 +67,10 @@ export default function WalletScreen() {
                 <Text style={styles.earningType}>{earning.type}</Text>
                 <Text style={styles.earningDate}>{earning.date}</Text>
               </View>
-              <Text style={styles.earningAmount}>+₵{earning.amount}</Text>
+              <Text style={styles.earningAmount}>
+                +{Brand.currency.symbol}
+                {earning.amount}
+              </Text>
             </View>
           ))}
         </View>
@@ -77,12 +88,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   balanceCard: {
-    backgroundColor: "#10B981",
+    backgroundColor: Colors.light.primary,
     marginHorizontal: 20,
     marginTop: 20,
     padding: 24,
     borderRadius: 20,
-    shadowColor: "#10B981",
+    shadowColor: Colors.light.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -142,13 +153,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "700" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
     marginBottom: 16,
   },
   earningCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.card,
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
@@ -173,16 +184,16 @@ const styles = StyleSheet.create({
   earningType: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
     marginBottom: 4,
   },
   earningDate: {
     fontSize: 14,
-    color: "#6B7280",
+    color: Colors.light.muted,
   },
   earningAmount: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#10B981",
+    color: Colors.light.primary,
   },
 });

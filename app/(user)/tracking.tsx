@@ -12,6 +12,7 @@ import {
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import Colors, { Brand } from "@/constants/colors";
 import { trpc } from "@/lib/trpc";
 
 type PickupStatus = "searching" | "assigned" | "on_way" | "arrived" | "collected";
@@ -58,7 +59,7 @@ export default function TrackingScreen() {
   if (!pickup) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color={Colors.light.primary} />
         <Text style={styles.loadingText}>Loading pickup details...</Text>
       </View>
     );
@@ -114,7 +115,7 @@ export default function TrackingScreen() {
                   longitude: pickup.location.longitude,
                 },
               ]}
-              strokeColor="#10B981"
+              strokeColor={Colors.light.primary}
               strokeWidth={3}
               lineDashPattern={[5, 5]}
             />
@@ -165,7 +166,7 @@ export default function TrackingScreen() {
             </View>
             <Text style={styles.completedTitle}>Pickup Completed!</Text>
             <Text style={styles.completedText}>
-              Thank you for using WasteWise. Your waste has been collected successfully.
+              Thank you for using {Brand.appName}. Your waste has been collected successfully.
             </Text>
           </View>
         )}
@@ -360,7 +361,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "#10B981",
+    backgroundColor: Colors.light.primary,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,

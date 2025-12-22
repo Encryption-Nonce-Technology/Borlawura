@@ -1,12 +1,15 @@
 import { Stack } from "expo-router";
 
+import Colors, { Brand } from "@/constants/colors";
+
 export default function UserLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: "#10B981" },
+        headerStyle: { backgroundColor: Colors.light.primary },
         headerTintColor: "#fff",
         headerTitleStyle: { fontWeight: "600" as const },
+        headerTitle: Brand.appName,
       }}
     >
       <Stack.Screen name="home" options={{ headerShown: false }} />

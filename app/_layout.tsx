@@ -5,6 +5,7 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StyleSheet } from "react-native";
 
+import Colors, { Brand } from "@/constants/colors";
 import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
@@ -16,9 +17,10 @@ function RootLayoutNav() {
     <Stack
       screenOptions={{
         headerBackTitle: "Back",
-        headerStyle: { backgroundColor: "#10B981" },
+        headerStyle: { backgroundColor: Colors.light.primary },
         headerTintColor: "#fff",
         headerTitleStyle: { fontWeight: "600" as const },
+        headerTitle: Brand.appName,
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />

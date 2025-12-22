@@ -1,7 +1,7 @@
 import { useLocalSearchParams, router } from "expo-router";
 import * as Location from "expo-location";
 import { Package } from "lucide-react-native";
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import Colors, { Brand } from "@/constants/colors";
 import { trpc } from "@/lib/trpc";
 
 type TrashType = "plastic" | "organic" | "mixed" | "ewaste";
@@ -64,8 +65,8 @@ export default function TrashDetailsScreen() {
         console.error("Error getting location:", error);
         setLocation({
           coords: {
-            latitude: -1.2921,
-            longitude: 36.8219,
+            latitude: 5.6037,
+            longitude: -0.187,
             altitude: null,
             accuracy: null,
             altitudeAccuracy: null,
@@ -74,12 +75,15 @@ export default function TrashDetailsScreen() {
           },
           timestamp: Date.now(),
         });
-        setAddress("Nairobi, Kenya");
+        setAddress("Accra, Ghana");
       }
     })();
   }, []);
 
-  const selectedPrice = quantities.find((q) => q.id === selectedQuantity)?.price || 0;
+  const selectedPrice = useMemo(
+    () => quantities.find((q) => q.id === selectedQuantity)?.price || 0,
+    [selectedQuantity],
+  );
 
   const handleConfirm = async () => {
     console.log("Confirming pickup request...");
@@ -165,7 +169,9 @@ export default function TrashDetailsScreen() {
                 <Text style={styles.quantityLabel}>{qty.label}</Text>
                 <Text style={styles.quantityDescription}>{qty.description}</Text>
               </View>
-              <Text style={styles.quantityPrice}>KSh {qty.price}</Text>
+              <Text style={styles.quantityPrice}>
+                {Brand.currency.symbol} {qty.price}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -184,7 +190,9 @@ export default function TrashDetailsScreen() {
       <View style={styles.footer}>
         <View style={styles.priceContainer}>
           <Text style={styles.priceLabel}>Estimated Cost</Text>
-          <Text style={styles.priceValue}>KSh {selectedPrice}</Text>
+          <Text style={styles.priceValue}>
+            {Brand.currency.symbol} {selectedPrice}
+          </Text>
         </View>
         <TouchableOpacity
           testID="confirm-button"
@@ -218,14 +226,14 @@ const styles = StyleSheet.create({
   },
   photosSection: {
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.card,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: Colors.light.border,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
     marginBottom: 16,
   },
   photoScroll: {
@@ -241,7 +249,7 @@ const styles = StyleSheet.create({
   },
   section: {
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.card,
     marginTop: 8,
   },
   optionsGrid: {
@@ -256,7 +264,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9FAFB",
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: "#E5E7EB",
+    borderColor: Colors.light.border,
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
@@ -272,7 +280,7 @@ const styles = StyleSheet.create({
   typeLabel: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
   },
   quantityCard: {
     flexDirection: "row",
@@ -283,11 +291,11 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderWidth: 2,
-    borderColor: "#E5E7EB",
+    borderColor: Colors.light.border,
   },
   quantityCardActive: {
     backgroundColor: "#ECFDF5",
-    borderColor: "#10B981",
+    borderColor: Colors.light.primary,
   },
   quantityInfo: {
     flex: 1,
@@ -295,17 +303,17 @@ const styles = StyleSheet.create({
   quantityLabel: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#1F2937",
+    color: Colors.light.text,
     marginBottom: 4,
   },
   quantityDescription: {
     fontSize: 14,
-    color: "#6B7280",
+    color: Colors.light.muted,
   },
   quantityPrice: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#10B981",
+    color: Colors.light.primary,
   },
   locationCard: {
     flexDirection: "row",
@@ -326,13 +334,13 @@ const styles = StyleSheet.create({
   locationText: {
     flex: 1,
     fontSize: 15,
-    color: "#1F2937",
+    color: Colors.light.text,
   },
   footer: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.card,
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: Colors.light.border,
   },
   priceContainer: {
     flexDirection: "row",
@@ -342,15 +350,15 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 16,
-    color: "#6B7280",
+    color: Colors.light.muted,
   },
   priceValue: {
     fontSize: 24,
     fontWeight: "700" as const,
-    color: "#10B981",
+    color: Colors.light.primary,
   },
   confirmButton: {
-    backgroundColor: "#10B981",
+    backgroundColor: Colors.light.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
