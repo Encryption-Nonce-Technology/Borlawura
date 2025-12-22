@@ -1,61 +1,9 @@
 import * as z from "zod";
-
+import { eq, and, ne } from "drizzle-orm";
 import { createTRPCRouter, publicProcedure } from "../create-context";
-
-type TrashType = "plastic" | "organic" | "mixed" | "ewaste";
-type Quantity = "small" | "sack" | "bin";
-type PickupStatus = "searching" | "assigned" | "on_way" | "arrived" | "collected" | "cancelled";
-
-interface Pickup {
-  id: string;
-  userId: string;
-  collectorId?: string;
-  photos: string[];
-  trashType: TrashType;
-  quantity: Quantity;
-  location: { latitude: number; longitude: number };
-  address: string;
-  price: number;
-  status: PickupStatus;
-  createdAt: Date;
-  collectorLocation?: { latitude: number; longitude: number };
-  eta?: number;
-}
-
-interface Collector {
-  id: string;
-  name: string;
-  photo: string;
-  licenseNumber: string;
-  vehicleType: string;
-  rating: number;
-  isOnline: boolean;
-  location?: { latitude: number; longitude: number };
-}
-
-const pickups: Pickup[] = [];
-const collectors: Collector[] = [
-  {
-    id: "c1",
-    name: "Kwame Mensah",
-    photo: "https://i.pravatar.cc/150?img=12",
-    licenseNumber: "GR-234-21",
-    vehicleType: "Pickup Truck",
-    rating: 4.8,
-    isOnline: true,
-    location: { latitude: 5.6037, longitude: -0.1870 },
-  },
-  {
-    id: "c2",
-    name: "Ama Osei",
-    photo: "https://i.pravatar.cc/150?img=27",
-    licenseNumber: "AS-567-19",
-    vehicleType: "Van",
-    rating: 4.9,
-    isOnline: true,
-    location: { latitude: 5.6100, longitude: -0.1950 },
-  },
-];
+import { db } from "../../db";
+import { pickups, collectors } from "../../db/schema";
+import { alias } from "drizzle-orm/sqlite-core";
 
 export const pickupsRouter = createTRPCRouter({
   create: publicProcedure
@@ -72,40 +20,57 @@ export const pickupsRouter = createTRPCRouter({
         address: z.string(),
       }),
     )
-    .mutation(({ input }) => {
+    .mutation(async ({ input }) => {
       const priceMap = {
         small: 50,
         sack: 150,
         bin: 300,
       };
 
-      const pickup: Pickup = {
-        id: `p${Date.now()}`,
+      const pickupId = `p${Date.now()}`;
+      const newPickup = {
+        id: pickupId,
         ...input,
         price: priceMap[input.quantity],
         status: "searching",
         createdAt: new Date(),
       };
 
-      pickups.push(pickup);
+      await db.insert(pickups).values(newPickup);
 
-      setTimeout(() => {
-        const onlineCollector = collectors.find((c) => c.isOnline);
-        if (onlineCollector) {
-          pickup.collectorId = onlineCollector.id;
-          pickup.status = "assigned";
-          pickup.collectorLocation = onlineCollector.location;
-          pickup.eta = 5;
+      // Simulate assignment logic
+      // In a real app, this might be a background job
+      setTimeout(async () => {
+        try {
+          // Find an online collector
+          const onlineCollector = await db.query.collectors.findFirst({
+            where: eq(collectors.isOnline, true)
+          });
+
+          if (onlineCollector) {
+            await db.update(pickups)
+              .set({
+                collectorId: onlineCollector.id,
+                status: "assigned",
+                collectorLocation: onlineCollector.location,
+                eta: 5
+              })
+              .where(eq(pickups.id, pickupId));
+          }
+        } catch (e) {
+          console.error("Error assigning collector:", e);
         }
       }, 2000);
 
-      return pickup;
+      return newPickup;
     }),
 
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
-    .query(({ input }) => {
-      return pickups.find((p) => p.id === input.id);
+    .query(async ({ input }) => {
+      return db.query.pickups.findFirst({
+        where: eq(pickups.id, input.id)
+      });
     }),
 
   updateStatus: publicProcedure
@@ -121,32 +86,39 @@ export const pickupsRouter = createTRPCRouter({
           .optional(),
       }),
     )
-    .mutation(({ input }) => {
-      const pickup = pickups.find((p) => p.id === input.id);
-      if (pickup) {
-        pickup.status = input.status;
-        if (input.collectorLocation) {
-          pickup.collectorLocation = input.collectorLocation;
-        }
-      }
-      return pickup;
+    .mutation(async ({ input }) => {
+      await db.update(pickups)
+        .set({
+          status: input.status,
+          ...(input.collectorLocation ? { collectorLocation: input.collectorLocation } : {})
+        })
+        .where(eq(pickups.id, input.id));
+
+      return db.query.pickups.findFirst({ where: eq(pickups.id, input.id) });
     }),
 
   getCollectorById: publicProcedure
     .input(z.object({ id: z.string() }))
-    .query(({ input }) => {
-      return collectors.find((c) => c.id === input.id);
+    .query(async ({ input }) => {
+      return db.query.collectors.findFirst({
+        where: eq(collectors.id, input.id)
+      });
     }),
 
-  getActiveRequests: publicProcedure.query(() => {
-    return pickups.filter((p) => p.status === "searching");
+  getActiveRequests: publicProcedure.query(async () => {
+    return db.query.pickups.findMany({
+      where: eq(pickups.status, "searching")
+    });
   }),
 
   getCollectorPickups: publicProcedure
     .input(z.object({ collectorId: z.string() }))
-    .query(({ input }) => {
-      return pickups.filter(
-        (p) => p.collectorId === input.collectorId && p.status !== "collected",
-      );
+    .query(async ({ input }) => {
+      return db.query.pickups.findMany({
+        where: and(
+          eq(pickups.collectorId, input.collectorId),
+          ne(pickups.status, "collected")
+        )
+      });
     }),
 });

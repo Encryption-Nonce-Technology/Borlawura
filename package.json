@@ -3,10 +3,13 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "bunx rork start -p boi5ou8x4jjj9rp7w61tm --tunnel",
-    "start-web": "bunx rork start -p boi5ou8x4jjj9rp7w61tm --web --tunnel",
-    "start-web-dev": "DEBUG=expo* bunx rork start -p boi5ou8x4jjj9rp7w61tm --web --tunnel",
-    "lint": "expo lint"
+    "start": "npx rork start -p boi5ou8x4jjj9rp7w61tm --tunnel",
+    "start-web": "npx rork start -p boi5ou8x4jjj9rp7w61tm --web --tunnel",
+    "start-web-dev": "DEBUG=expo* npx rork start -p boi5ou8x4jjj9rp7w61tm --web --tunnel",
+    "lint": "expo lint",
+    "start-backend": "tsx backend/index.ts",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -56,9 +59,14 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@expo/ngrok": "^4.1.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/react": "~19.1.10",
+    "better-sqlite3": "^12.5.0",
+    "drizzle-kit": "^0.31.8",
+    "drizzle-orm": "^0.45.1",
     "eslint": "^9.31.0",
     "eslint-config-expo": "~10.0.0",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.2"
   },
   "private": true
