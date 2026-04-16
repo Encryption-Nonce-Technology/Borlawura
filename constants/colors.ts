@@ -1,5 +1,5 @@
 const Brand = {
-  appName: "BorlaWura",
+  appName: "Borlawura",
   tagline: "Snap it. Request it. It\u2019s gone.",
   currency: {
     code: "GHS",

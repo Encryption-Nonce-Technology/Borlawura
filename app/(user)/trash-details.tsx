@@ -1,4 +1,5 @@
 import { useLocalSearchParams, router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 import { Package } from "lucide-react-native";
 import { useMemo, useState, useEffect } from "react";
@@ -19,6 +20,8 @@ import { trpc } from "@/lib/trpc";
 
 type TrashType = "plastic" | "organic" | "mixed" | "ewaste";
 type Quantity = "small" | "sack" | "bin";
+type PaymentMethod = "mtn_momo" | "vodafone_cash" | "airteltigo_cash";
+type PlanType = "weekly" | "monthly";
 
 const trashTypes: { id: TrashType; label: string; icon: string; color: string }[] = [
   { id: "plastic", label: "Plastic", icon: "♻️", color: "#3B82F6" },
@@ -40,8 +43,13 @@ export default function TrashDetailsScreen() {
   const [selectedQuantity, setSelectedQuantity] = useState<Quantity | null>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [address, setAddress] = useState<string>("Getting location...");
+  const [isUrgent, setIsUrgent] = useState<boolean>(false);
+  const [communityCode, setCommunityCode] = useState<string>("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("mtn_momo");
+  const [subscriptionPlan, setSubscriptionPlan] = useState<PlanType | null>(null);
 
   const createPickupMutation = trpc.pickups.create.useMutation();
+  const plansQuery = trpc.subscriptions.plans.useQuery();
 
   useEffect(() => {
     (async () => {
@@ -103,6 +111,10 @@ export default function TrashDetailsScreen() {
           longitude: location.coords.longitude,
         },
         address,
+        isUrgent,
+        communityCode: communityCode || undefined,
+        subscriptionPlan: subscriptionPlan ?? undefined,
+        paymentMethod,
       });
 
       console.log("Pickup created:", pickup.id);
@@ -112,7 +124,26 @@ export default function TrashDetailsScreen() {
       });
     } catch (error) {
       console.error("Error creating pickup:", error);
-      Alert.alert("Error", "Failed to create pickup request");
+      const queuedKey = `offline-pickup-${Date.now()}`;
+      await AsyncStorage.setItem(
+        queuedKey,
+        JSON.stringify({
+          userId: "user1",
+          photos,
+          trashType: selectedType,
+          quantity: selectedQuantity,
+          location: {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          },
+          address,
+          isUrgent,
+          communityCode: communityCode || undefined,
+          subscriptionPlan: subscriptionPlan ?? undefined,
+          paymentMethod,
+        }),
+      );
+      Alert.alert("Offline saved", "Request saved locally and will be synced when backend is reachable.");
     }
   };
 
@@ -174,6 +205,73 @@ export default function TrashDetailsScreen() {
               </Text>
             </TouchableOpacity>
           ))}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Request Options</Text>
+          <TouchableOpacity
+            style={[styles.quantityCard, isUrgent && styles.quantityCardActive]}
+            onPress={() => setIsUrgent((v) => !v)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.quantityInfo}>
+              <Text style={styles.quantityLabel}>SOS Cleanup Request</Text>
+              <Text style={styles.quantityDescription}>Urgent pickup with higher fee</Text>
+            </View>
+            <Text style={styles.quantityPrice}>{isUrgent ? "ON" : "OFF"}</Text>
+          </TouchableOpacity>
+          <View style={styles.locationCard}>
+            <View style={styles.quantityInfo}>
+              <Text style={styles.quantityLabel}>Community Pickup Code</Text>
+              <Text style={styles.quantityDescription}>
+                Add code to group with neighbors (example: OSU-BLOCK-A)
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.communityChip}
+              onPress={() => setCommunityCode(communityCode ? "" : "OSU-BLOCK-A")}
+            >
+              <Text style={styles.communityChipText}>{communityCode || "Set sample"}</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.locationCard}>
+            <View style={styles.quantityInfo}>
+              <Text style={styles.quantityLabel}>Payment Method</Text>
+              <Text style={styles.quantityDescription}>MTN MoMo, Vodafone Cash, AirtelTigo</Text>
+            </View>
+            <Text style={styles.locationText}>{paymentMethod.replace("_", " ")}</Text>
+          </View>
+          <View style={styles.optionsGrid}>
+            {(["mtn_momo", "vodafone_cash", "airteltigo_cash"] as PaymentMethod[]).map((method) => (
+              <TouchableOpacity
+                key={method}
+                style={[
+                  styles.typeCard,
+                  paymentMethod === method && styles.typeCardActive,
+                ]}
+                onPress={() => setPaymentMethod(method)}
+              >
+                <Text style={styles.typeLabel}>{method.replace("_", " ").toUpperCase()}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Subscription Plan</Text>
+          <View style={styles.optionsGrid}>
+            {(plansQuery.data ?? []).map((plan) => (
+              <TouchableOpacity
+                key={plan.id}
+                style={[styles.typeCard, subscriptionPlan === plan.id && styles.typeCardActive]}
+                onPress={() =>
+                  setSubscriptionPlan((prev) => (prev === plan.id ? null : (plan.id as PlanType)))
+                }
+              >
+                <Text style={styles.typeLabel}>{plan.label}</Text>
+                <Text style={styles.quantityDescription}>
+                  {Brand.currency.symbol} {plan.price}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -335,6 +433,17 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     color: Colors.light.text,
+  },
+  communityChip: {
+    backgroundColor: "#ECFDF5",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  communityChipText: {
+    color: Colors.light.primaryDark,
+    fontWeight: "600" as const,
+    fontSize: 12,
   },
   footer: {
     backgroundColor: Colors.light.card,

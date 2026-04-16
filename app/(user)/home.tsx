@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import * as Location from "expo-location";
 import { Camera, MapPin, User } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert, Image } from "react-native";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -110,7 +110,8 @@ export default function UserHomeScreen() {
       <SafeAreaView style={styles.overlay} edges={["top"]}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>🌱 {Brand.appName}</Text>
+            <Image source={require("@/assets/images/icon.png")} style={styles.logoImage} />
+            <Text style={styles.logoText}>{Brand.appName}</Text>
           </View>
           <TouchableOpacity
             style={styles.profileButton}
@@ -179,14 +180,22 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     backgroundColor: Colors.light.card,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  logoImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    marginRight: 8,
   },
   logoText: {
     fontSize: 18,

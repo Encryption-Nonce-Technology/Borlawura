@@ -3,20 +3,22 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-nati
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors, { Brand } from "@/constants/colors";
-
-const mockEarnings = [
-  { id: "1", amount: 300, date: "Today, 2:30 PM", type: "Bin collection", status: "completed" },
-  { id: "2", amount: 150, date: "Today, 11:15 AM", type: "Sack collection", status: "completed" },
-  { id: "3", amount: 50, date: "Yesterday, 4:45 PM", type: "Small bag", status: "completed" },
-  { id: "4", amount: 300, date: "Yesterday, 1:20 PM", type: "Bin collection", status: "completed" },
-  { id: "5", amount: 150, date: "2 days ago", type: "Sack collection", status: "completed" },
-];
+import { trpc } from "@/lib/trpc";
 
 export default function WalletScreen() {
-  const totalEarnings = mockEarnings.reduce((sum, earning) => sum + earning.amount, 0);
-  const todayEarnings = mockEarnings
-    .filter((e) => e.date.includes("Today"))
-    .reduce((sum, earning) => sum + earning.amount, 0);
+  const collectorId = "c1";
+  const summaryQuery = trpc.wallet.summary.useQuery({ collectorId });
+  const historyQuery = trpc.wallet.history.useQuery({ collectorId });
+  const withdrawMutation = trpc.wallet.requestWithdrawal.useMutation({
+    onSuccess: async () => {
+      await summaryQuery.refetch();
+      await historyQuery.refetch();
+    },
+  });
+
+  const totalEarnings = summaryQuery.data?.totalEarnings ?? 0;
+  const completedJobs = summaryQuery.data?.completedJobs ?? 0;
+  const history = historyQuery.data ?? [];
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
@@ -31,44 +33,50 @@ export default function WalletScreen() {
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <TrendingUp size={20} color="#10B981" />
-              <Text style={styles.statValue}>
-                {Brand.currency.symbol}
-                {todayEarnings}
-              </Text>
-              <Text style={styles.statLabel}>Today</Text>
+              <Text style={styles.statValue}>{completedJobs}</Text>
+              <Text style={styles.statLabel}>Completed</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Calendar size={20} color="#3B82F6" />
-              <Text style={styles.statValue}>{mockEarnings.length}</Text>
-              <Text style={styles.statLabel}>Pickups</Text>
+              <Text style={styles.statValue}>{history.length}</Text>
+              <Text style={styles.statLabel}>Transactions</Text>
             </View>
           </View>
 
           <TouchableOpacity
             style={styles.withdrawButton}
-            onPress={() => console.log("Withdraw pressed")}
+            onPress={() =>
+              withdrawMutation.mutate({
+                collectorId,
+                amount: Math.max(50, Math.floor(totalEarnings * 0.3)),
+                method: "mtn_momo",
+              })
+            }
             testID="withdraw-button"
           >
             <DollarSign size={20} color="#fff" />
-            <Text style={styles.withdrawButtonText}>Withdraw to Mobile Money</Text>
+            <Text style={styles.withdrawButtonText}>
+              {withdrawMutation.isPending ? "Processing..." : "Withdraw to Mobile Money"}
+            </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Recent Earnings</Text>
 
-          {mockEarnings.map((earning) => (
+          {history.map((earning) => (
             <View key={earning.id} style={styles.earningCard}>
               <View style={styles.earningIcon}>
                 <CheckCircle size={24} color="#10B981" />
               </View>
               <View style={styles.earningInfo}>
                 <Text style={styles.earningType}>{earning.type}</Text>
-                <Text style={styles.earningDate}>{earning.date}</Text>
+                <Text style={styles.earningDate}>{new Date(earning.createdAt).toLocaleString()}</Text>
               </View>
               <Text style={styles.earningAmount}>
-                +{Brand.currency.symbol}
+                {earning.type === "withdrawal" ? "-" : "+"}
+                {Brand.currency.symbol}
                 {earning.amount}
               </Text>
             </View>

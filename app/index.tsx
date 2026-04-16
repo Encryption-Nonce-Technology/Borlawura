@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { Truck, Package } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors, { Brand } from "@/constants/colors";
@@ -9,7 +9,7 @@ import Colors, { Brand } from "@/constants/colors";
 const { width } = Dimensions.get("window");
 
 export default function RoleSelectorScreen() {
-  const [selectedRole, setSelectedRole] = useState<"user" | "collector" | null>(null);
+  const [selectedRole, setSelectedRole] = useState<"user" | "collector" | "admin" | null>(null);
 
   const currencySymbol = useMemo(() => Brand.currency.symbol, []);
 
@@ -18,6 +18,8 @@ export default function RoleSelectorScreen() {
       router.push("/(user)/home" as any);
     } else if (selectedRole === "collector") {
       router.push("/(collector)/home" as any);
+    } else if (selectedRole === "admin") {
+      router.push("/(admin)/dashboard" as any);
     }
   };
 
@@ -30,7 +32,8 @@ export default function RoleSelectorScreen() {
 
       <SafeAreaView style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.logo}>🌱 {Brand.appName}</Text>
+          <Image source={require("@/assets/images/icon.png")} style={styles.logoImage} />
+          <Text style={styles.logo}>{Brand.appName}</Text>
           <Text style={styles.tagline}>{Brand.tagline}</Text>
         </View>
 
@@ -75,6 +78,23 @@ export default function RoleSelectorScreen() {
               </Text>
             </View>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            testID="admin-role-button"
+            style={[styles.roleCard, selectedRole === "admin" && styles.roleCardActive]}
+            onPress={() => setSelectedRole("admin")}
+            activeOpacity={0.7}
+          >
+            <View
+              style={[styles.iconContainer, selectedRole === "admin" && styles.iconContainerActive]}
+            >
+              <Text style={{ color: selectedRole === "admin" ? "#fff" : "#10B981", fontSize: 30 }}>🧑‍💼</Text>
+            </View>
+            <View style={styles.roleInfo}>
+              <Text style={styles.roleTitle}>Admin dashboard</Text>
+              <Text style={styles.roleDescription}>Manage users, collectors, requests and analytics</Text>
+            </View>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity
@@ -85,6 +105,15 @@ export default function RoleSelectorScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.buttonText}>Continue</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => router.push("/(auth)/login" as any)}
+          style={{ alignItems: "center", marginTop: 12 }}
+        >
+          <Text style={{ color: Colors.light.primaryDark, fontWeight: "600" as const }}>
+            Sign in with phone + OTP
+          </Text>
         </TouchableOpacity>
       </SafeAreaView>
     </View>
@@ -130,6 +159,12 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     marginTop: 40,
+  },
+  logoImage: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    marginBottom: 8,
   },
   logo: {
     fontSize: 36,

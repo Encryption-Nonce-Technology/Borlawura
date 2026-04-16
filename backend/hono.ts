@@ -12,14 +12,14 @@ app.use("*", cors());
 app.use(
   "/trpc/*",
   trpcServer({
-    endpoint: "/api/trpc",
+    endpoint: "/trpc",
     router: appRouter,
     createContext,
   }),
 );
 
 app.get("/", (c) => {
-  return c.json({ status: "ok", message: "WasteWise API is running" });
+  return c.json({ status: "ok", message: "Borlawura API is running" });
 });
 
 export default app;

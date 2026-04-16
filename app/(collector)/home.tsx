@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Power, PowerOff, Wallet, Image as ImageIcon, MapPin } from "lucide-react-native";
+import { Power, PowerOff, Wallet, Image as ImageIcon, MapPin, Route } from "lucide-react-native";
 import { useState } from "react";
 import {
   View,
@@ -21,6 +21,10 @@ export default function CollectorHomeScreen() {
   const requestsQuery = trpc.pickups.getActiveRequests.useQuery(undefined, {
     refetchInterval: isOnline ? 3000 : 0,
   });
+  const optimizedQuery = trpc.routing.optimizeForCollector.useQuery(
+    { collectorId: "c1" },
+    { enabled: isOnline, refetchInterval: isOnline ? 5000 : 0 },
+  );
 
   const handleToggleOnline = () => {
     console.log("Toggling online status:", !isOnline);
@@ -41,7 +45,10 @@ export default function CollectorHomeScreen() {
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.logo}>🌱 {Brand.appName}</Text>
+          <View style={styles.logoRow}>
+            <Image source={require("@/assets/images/icon.png")} style={styles.logoImage} />
+            <Text style={styles.logo}>{Brand.appName}</Text>
+          </View>
           <Text style={styles.subtitle}>Collector</Text>
         </View>
         <TouchableOpacity
@@ -74,6 +81,14 @@ export default function CollectorHomeScreen() {
       </View>
 
       <View style={styles.content}>
+        {optimizedQuery.data && optimizedQuery.data.length > 0 && (
+          <View style={styles.routeHint}>
+            <Route size={16} color={Colors.light.primary} />
+            <Text style={styles.routeHintText}>
+              Best route starts with request {optimizedQuery.data[0].id}
+            </Text>
+          </View>
+        )}
         <Text style={styles.sectionTitle}>
           {isOnline ? "Available Requests" : "Go online to see requests"}
         </Text>
@@ -189,6 +204,16 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: Colors.light.text,
   },
+  logoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  logoImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+  },
   subtitle: {
     fontSize: 14,
     color: Colors.light.muted,
@@ -271,6 +296,19 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: Colors.light.text,
     marginBottom: 16,
+  },
+  routeHint: {
+    backgroundColor: "#ECFDF5",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  routeHintText: {
+    color: Colors.light.primaryDark,
+    fontWeight: "600" as const,
   },
   requestsList: {
     flex: 1,

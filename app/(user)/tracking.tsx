@@ -46,6 +46,8 @@ export default function TrackingScreen() {
   );
 
   const collector = collectorQuery.data;
+  const paymentMutation = trpc.pickups.payForPickup.useMutation();
+  const ratingMutation = trpc.ratings.leaveReview.useMutation();
 
   useEffect(() => {
     if (pickup?.status === "collected") {
@@ -168,6 +170,37 @@ export default function TrackingScreen() {
             <Text style={styles.completedText}>
               Thank you for using {Brand.appName}. Your waste has been collected successfully.
             </Text>
+            {pickup.paymentStatus !== "paid" && (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() =>
+                  paymentMutation.mutate({
+                    pickupId: pickup.id,
+                    method: (pickup.paymentMethod as any) || "mtn_momo",
+                  })
+                }
+              >
+                <Text style={styles.actionButtonText}>
+                  {paymentMutation.isPending ? "Processing..." : "Pay for Pickup"}
+                </Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: "#2563EB", marginTop: 10 }]}
+              onPress={() =>
+                ratingMutation.mutate({
+                  pickupId: pickup.id,
+                  fromUserId: "u1",
+                  toUserId: pickup.collectorId || "u2",
+                  rating: 5,
+                  comment: "Great service",
+                })
+              }
+            >
+              <Text style={styles.actionButtonText}>
+                {ratingMutation.isPending ? "Saving..." : "Rate Collector (5★)"}
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
       </SafeAreaView>
@@ -377,5 +410,16 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     textAlign: "center",
     lineHeight: 20,
+  },
+  actionButton: {
+    marginTop: 14,
+    backgroundColor: Colors.light.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  actionButtonText: {
+    color: "#fff",
+    fontWeight: "700" as const,
   },
 });
