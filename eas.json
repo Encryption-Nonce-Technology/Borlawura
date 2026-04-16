@@ -1,9 +1,13 @@
 {
   "cli": {
-    "version": ">= 18.7.0"
+    "version": ">= 18.7.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "preview": {
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+      },
       "android": {
         "buildType": "apk"
       }
