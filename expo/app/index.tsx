@@ -5,6 +5,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from "rea
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors, { Brand } from "@/constants/colors";
+import { saveGuestSession } from "@/lib/session";
 
 const { width } = Dimensions.get("window");
 
@@ -12,14 +13,23 @@ export default function RoleSelectorScreen() {
   const [selectedRole, setSelectedRole] = useState<"user" | "collector" | "admin" | null>(null);
 
   const currencySymbol = useMemo(() => Brand.currency.symbol, []);
+  const [isEntering, setIsEntering] = useState(false);
 
-  const handleContinue = () => {
-    if (selectedRole === "user") {
-      router.push("/(user)/home" as any);
-    } else if (selectedRole === "collector") {
-      router.push("/(collector)/home" as any);
-    } else if (selectedRole === "admin") {
-      router.push("/(admin)/dashboard" as any);
+  const handleContinue = async () => {
+    if (!selectedRole || isEntering) return;
+
+    setIsEntering(true);
+    try {
+      await saveGuestSession(selectedRole);
+      if (selectedRole === "user") {
+        router.replace("/(user)/home" as any);
+      } else if (selectedRole === "collector") {
+        router.replace("/(collector)/home" as any);
+      } else if (selectedRole === "admin") {
+        router.replace("/(admin)/dashboard" as any);
+      }
+    } finally {
+      setIsEntering(false);
     }
   };
 
@@ -104,16 +114,7 @@ export default function RoleSelectorScreen() {
           disabled={!selectedRole}
           activeOpacity={0.8}
         >
-          <Text style={styles.buttonText}>Continue</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => router.push("/(auth)/login" as any)}
-          style={{ alignItems: "center", marginTop: 12 }}
-        >
-          <Text style={{ color: Colors.light.primaryDark, fontWeight: "600" as const }}>
-            Sign in with phone + OTP
-          </Text>
+          <Text style={styles.buttonText}>{isEntering ? "Entering..." : "Continue as guest"}</Text>
         </TouchableOpacity>
       </SafeAreaView>
     </View>

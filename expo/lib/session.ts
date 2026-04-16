@@ -29,6 +29,26 @@ export async function saveSession(session: SessionState) {
   await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
 }
 
+export async function saveGuestSession(role: SessionUser["role"]) {
+  const id = `guest_${role}_${Date.now()}`;
+  const session: SessionState = {
+    token: `guest_token_${Date.now()}`,
+    user: {
+      id,
+      name:
+        role === "collector"
+          ? "Guest Collector"
+          : role === "admin"
+            ? "Guest Admin"
+            : "Guest User",
+      phone: `guest-${role}`,
+      role,
+    },
+  };
+  await saveSession(session);
+  return session;
+}
+
 export async function clearSession() {
   await AsyncStorage.removeItem(SESSION_KEY);
 }

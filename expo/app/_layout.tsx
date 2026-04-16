@@ -50,22 +50,17 @@ export default function RootLayout() {
   useEffect(() => {
     if (loading) return;
     const rootSegment = segments[0];
-    const inAuthGroup = rootSegment === "(auth)";
     const inAdminGroup = rootSegment === "(admin)";
     const inUserGroup = rootSegment === "(user)";
     const inCollectorGroup = rootSegment === "(collector)";
 
-    if (!session && !inAuthGroup) {
-      router.replace("/(auth)/login" as any);
+    if (!session && rootSegment !== undefined) {
+      router.replace("/" as any);
       return;
     }
 
     if (!session) return;
 
-    if (inAuthGroup) {
-      router.replace("/" as any);
-      return;
-    }
     if (inAdminGroup && session.user.role !== "admin") {
       router.replace("/" as any);
       return;
