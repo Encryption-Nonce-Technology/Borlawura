@@ -5,17 +5,17 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "rork-app",
+    "scheme": "borlawura",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#DCFCE7"
     },
     "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "app.rork.borlawura-pickup",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.borlawura.app",
       "infoPlist": {
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow $(PRODUCT_NAME) to use your location.",
         "NSLocationAlwaysUsageDescription": "Allow $(PRODUCT_NAME) to use your location.",
@@ -30,9 +30,9 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#DCFCE7"
       },
-      "package": "app.rork.borlawura_pickup",
+      "package": "com.borlawura.app",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
@@ -50,7 +50,7 @@
       [
         "expo-router",
         {
-          "origin": "https://rork.com/"
+          "origin": "https://borlawura.com/"
         }
       ],
       "expo-font",
@@ -78,7 +78,7 @@
     },
     "extra": {
       "router": {
-        "origin": "https://rork.com/"
+        "origin": "https://borlawura.com/"
       },
       "eas": {
         "projectId": "b6f5d7ea-5138-460b-9df6-84cd8fa6c454"

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -40,12 +40,27 @@ import { useSession } from "@/lib/session";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const IS_DESKTOP = Platform.OS === "web" && SCREEN_WIDTH > 860;
+const IS_NATIVE = Platform.OS === "android" || Platform.OS === "ios";
 
 export default function BorlaPlusInspiredHomepage() {
   const [activeTab, setActiveTab] = useState<"instant" | "schedule" | "drive">("instant");
   const [address, setAddress] = useState<string>("East Legon, Accra");
   const [selectedTier, setSelectedTier] = useState<string>("small");
   const { session } = useSession();
+
+  // On mobile native apps, skip the website landing page
+  useEffect(() => {
+    if (IS_NATIVE) {
+      if (session?.user) {
+        const role = session.user.role;
+        if (role === "collector") router.replace("/(collector)/home" as any);
+        else if (role === "admin") router.replace("/(admin)/dashboard" as any);
+        else router.replace("/(user)/home" as any);
+      } else {
+        router.replace("/(auth)/login" as any);
+      }
+    }
+  }, [session]);
 
   const handleLaunchApp = (role: "user" | "collector" | "admin" = "user") => {
     if (session && session.user.role === role) {
