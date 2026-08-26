@@ -5,7 +5,13 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../create
 import { db } from "../../db";
 import { pickups, collectors, walletTransactions } from "../../db/schema";
 
-const paymentMethodSchema = z.enum(["mtn_momo", "vodafone_cash", "airteltigo_cash"]);
+const paymentMethodSchema = z.enum([
+  "mtn_momo",
+  "vodafone_cash",
+  "airteltigo_cash",
+  "cash",
+  "telecel_cash",
+]);
 
 function haversineKm(
   a: { latitude: number; longitude: number },
@@ -44,14 +50,14 @@ export const pickupsRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const priceMap = {
-        small: 50,
-        sack: 150,
-        bin: 300,
+        small: 15,
+        sack: 35,
+        bin: 65,
       };
       const typeMultiplier = {
         plastic: 1.0,
         organic: 0.9,
-        mixed: 1.2,
+        mixed: 1.0,
         ewaste: 1.5,
       };
 
@@ -62,12 +68,12 @@ export const pickupsRouter = createTRPCRouter({
         onlineCollector?.location != null
           ? haversineKm(onlineCollector.location, input.location)
           : 2;
-      const distanceFee = Math.round(distanceKm * 10);
+      const distanceFee = Math.round(distanceKm * 2);
       const base = priceMap[input.quantity];
       const typeAdjusted = Math.round(base * typeMultiplier[input.trashType]);
-      const urgencyFee = input.isUrgent ? 100 : 0;
-      const communityDiscount = input.communityCode ? -25 : 0;
-      const totalPrice = Math.max(20, typeAdjusted + distanceFee + urgencyFee + communityDiscount);
+      const urgencyFee = input.isUrgent ? 30 : 0;
+      const communityDiscount = input.communityCode ? -5 : 0;
+      const totalPrice = Math.max(15, typeAdjusted + distanceFee + urgencyFee + communityDiscount);
 
       const pickupId = `p${Date.now()}`;
       const newPickup = {
@@ -84,70 +90,40 @@ export const pickupsRouter = createTRPCRouter({
 
       await db.insert(pickups).values(newPickup);
 
-      // Simulate progressive assignment/tracking and movement. Every stage is
-      // guarded so the simulation never overwrites progress made by a real
-      // collector through acceptRequest/updateStatus/completePickup.
+      // Simulate progressive assignment/tracking
       setTimeout(async () => {
         try {
           const assignedCollector = await db.query.collectors.findFirst({
-            where: eq(collectors.isOnline, true)
+            where: eq(collectors.isOnline, true),
           });
 
           if (assignedCollector) {
-            const assigned = await db.update(pickups)
+            await db
+              .update(pickups)
               .set({
                 collectorId: assignedCollector.id,
                 status: "assigned",
-                collectorLocation: assignedCollector.location,
-                eta: 5
+                collectorLocation: assignedCollector.location || {
+                  latitude: input.location.latitude + 0.003,
+                  longitude: input.location.longitude - 0.002,
+                },
+                eta: 4,
               })
-              .where(and(eq(pickups.id, pickupId), eq(pickups.status, "searching")))
-              .returning({ id: pickups.id });
-
-            if (assigned.length === 0) return; // already accepted manually
-
-            setTimeout(async () => {
-              await db
-                .update(pickups)
-                .set({
-                  status: "on_way",
-                  collectorLocation: {
-                    latitude:
-                      (assignedCollector.location?.latitude ?? input.location.latitude) * 0.7 +
-                      input.location.latitude * 0.3,
-                    longitude:
-                      (assignedCollector.location?.longitude ?? input.location.longitude) * 0.7 +
-                      input.location.longitude * 0.3,
-                  },
-                  eta: 3,
-                })
-                .where(and(eq(pickups.id, pickupId), eq(pickups.status, "assigned")));
-            }, 2500);
-
-            setTimeout(async () => {
-              await db
-                .update(pickups)
-                .set({
-                  status: "arrived",
-                  collectorLocation: input.location,
-                  eta: 1,
-                })
-                .where(and(eq(pickups.id, pickupId), eq(pickups.status, "on_way")));
-            }, 5000);
+              .where(eq(pickups.id, pickupId));
           }
         } catch (e) {
           console.error("Error assigning collector:", e);
         }
-      }, 2000);
+      }, 1500);
 
-      return newPickup;
+      return db.query.pickups.findFirst({ where: eq(pickups.id, pickupId) });
     }),
 
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       return db.query.pickups.findFirst({
-        where: eq(pickups.id, input.id)
+        where: eq(pickups.id, input.id),
       });
     }),
 
@@ -165,10 +141,11 @@ export const pickupsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      await db.update(pickups)
+      await db
+        .update(pickups)
         .set({
           status: input.status,
-          ...(input.collectorLocation ? { collectorLocation: input.collectorLocation } : {})
+          ...(input.collectorLocation ? { collectorLocation: input.collectorLocation } : {}),
         })
         .where(eq(pickups.id, input.id));
 
@@ -209,6 +186,20 @@ export const pickupsRouter = createTRPCRouter({
       return db.query.pickups.findFirst({ where: eq(pickups.id, input.pickupId) });
     }),
 
+  acceptPickup: publicProcedure
+    .input(z.object({ pickupId: z.string(), collectorId: z.string().optional() }))
+    .mutation(async ({ input }) => {
+      await db
+        .update(pickups)
+        .set({
+          collectorId: input.collectorId || "c_kwame",
+          status: "assigned",
+          eta: 4,
+        })
+        .where(eq(pickups.id, input.pickupId));
+      return { success: true };
+    }),
+
   completePickup: protectedProcedure
     .input(
       z.object({
@@ -217,8 +208,6 @@ export const pickupsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // Derive identity from the session so earnings are recorded for the
-      // signed-in collector (c_<userId>), matching the wallet routes.
       const collector = await db.query.collectors.findFirst({
         where: eq(collectors.userId, ctx.user.id),
       });
@@ -281,7 +270,7 @@ export const pickupsRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       return db.query.collectors.findFirst({
-        where: eq(collectors.id, input.id)
+        where: eq(collectors.id, input.id),
       });
     }),
 
@@ -302,7 +291,7 @@ export const pickupsRouter = createTRPCRouter({
 
   getActiveRequests: publicProcedure.query(async () => {
     return db.query.pickups.findMany({
-      where: eq(pickups.status, "searching")
+      where: eq(pickups.status, "searching"),
     });
   }),
 
@@ -312,8 +301,8 @@ export const pickupsRouter = createTRPCRouter({
       return db.query.pickups.findMany({
         where: and(
           eq(pickups.collectorId, input.collectorId),
-          ne(pickups.status, "collected")
-        )
+          ne(pickups.status, "collected"),
+        ),
       });
     }),
 });

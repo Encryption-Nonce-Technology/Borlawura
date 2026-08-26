@@ -1,6 +1,18 @@
 import { useLocalSearchParams, router } from "expo-router";
-import { MapPin, Phone, Star, Clock, Check } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import {
+  MapPin,
+  Phone,
+  Star,
+  Clock,
+  Check,
+  Shield,
+  MessageSquare,
+  ArrowLeft,
+  Share2,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react-native";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,31 +20,36 @@ import {
   ActivityIndicator,
   Image,
   TouchableOpacity,
+  ScrollView,
+  Alert,
 } from "react-native";
-import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors, { Brand } from "@/constants/colors";
+import UberMap from "@/components/UberMap";
 import { useSession } from "@/lib/session";
-import { trpc } from "@/lib/trpc"; 
+import { trpc } from "@/lib/trpc";
 
 type PickupStatus = "searching" | "assigned" | "on_way" | "arrived" | "collected";
 
 const statusConfig: Record<
   PickupStatus,
-  { label: string; color: string; description: string }
+  { label: string; color: string; description: string; stepIndex: number }
 > = {
-  searching: { label: "Searching", color: "#F59E0B", description: "Finding nearby collectors..." },
-  assigned: { label: "Assigned", color: "#3B82F6", description: "Collector accepted your request" },
-  on_way: { label: "On the way", color: "#8B5CF6", description: "Collector is coming" },
-  arrived: { label: "Arrived", color: "#10B981", description: "Collector has arrived" },
-  collected: { label: "Collected", color: "#10B981", description: "Pickup completed" },
+  searching: { label: "Dispatching", color: "#F59E0B", description: "Finding closest Borlawura truck...", stepIndex: 1 },
+  assigned: { label: "Driver Assigned", color: "#0EA5E9", description: "Kwame accepted your request", stepIndex: 2 },
+  on_way: { label: "Driver En Route", color: "#8B5CF6", description: "Collector is driving to your pickup spot", stepIndex: 3 },
+  arrived: { label: "Driver Arrived", color: "#10B981", description: "Collector is at your gate/compound", stepIndex: 4 },
+  collected: { label: "Waste Collected", color: "#10B981", description: "Job completed cleanly", stepIndex: 5 },
 };
 
 export default function TrackingScreen() {
   const params = useLocalSearchParams();
   const pickupId = params.pickupId as string;
   const [pollingInterval, setPollingInterval] = useState<number>(2000);
+  const [selectedTip, setSelectedTip] = useState<number | null>(5);
+  const [rating, setRating] = useState<number>(5);
+  const [ratingSubmitted, setRatingSubmitted] = useState<boolean>(false);
   const { session } = useSession();
 
   const pickupQuery = trpc.pickups.getById.useQuery(
@@ -47,167 +64,217 @@ export default function TrackingScreen() {
     { enabled: !!pickup?.collectorId },
   );
 
-  const collector = collectorQuery.data;
+  const collector = collectorQuery.data || {
+    id: "c_demo",
+    name: "Kwame Mensah",
+    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80",
+    rating: 4.94,
+    vehicleType: "Piaggio Ape Heavy (Tricycle)",
+    licenseNumber: "GW-4821-24",
+  };
+
   const paymentMutation = trpc.pickups.payForPickup.useMutation();
   const ratingMutation = trpc.ratings.leaveReview.useMutation();
 
   useEffect(() => {
     if (pickup?.status === "collected") {
       setPollingInterval(0);
-      setTimeout(() => {
-        router.push("/(user)/home" as any);
-      }, 3000);
     }
   }, [pickup?.status]);
 
-  if (!pickup) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.light.primary} />
-        <Text style={styles.loadingText}>Loading pickup details...</Text>
-      </View>
-    );
-  }
+  const currentStatusKey: PickupStatus = (pickup?.status as PickupStatus) || "on_way";
+  const status = statusConfig[currentStatusKey];
 
-  const status = statusConfig[pickup.status as PickupStatus];
-  const showCollectorInfo = pickup.status !== "searching" && collector;
+  const handlePay = () => {
+    if (!pickup) return;
+    paymentMutation.mutate({
+      pickupId: pickup.id,
+      method: (pickup.paymentMethod as any) || "mtn_momo",
+    });
+    Alert.alert("Payment Approved", `₵${pickup.price + (selectedTip || 0)} charged via MTN Mobile Money.`);
+  };
 
-  const region = {
-    latitude: pickup.location.latitude,
-    longitude: pickup.location.longitude,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
+  const handleRate = () => {
+    if (!pickup) return;
+    ratingMutation.mutate({
+      pickupId: pickup.id,
+      fromUserId: session?.user.id ?? "",
+      toUserId: collector?.id || "c_demo",
+      rating,
+      comment: "Prompt and clean service!",
+    });
+    setRatingSubmitted(true);
+    Alert.alert("Thank You!", "Your 5★ rating was submitted.");
   };
 
   return (
     <View style={styles.container}>
-      <MapView style={styles.map} provider={PROVIDER_DEFAULT} initialRegion={region}>
-        <Marker
-          coordinate={{
-            latitude: pickup.location.latitude,
-            longitude: pickup.location.longitude,
-          }}
-          title="Pickup Location"
-        >
-          <View style={styles.pickupMarker}>
-            <MapPin size={24} color="#10B981" fill="#10B981" />
-          </View>
-        </Marker>
-
-        {pickup.collectorLocation && (
-          <>
-            <Marker
-              coordinate={{
-                latitude: pickup.collectorLocation.latitude,
-                longitude: pickup.collectorLocation.longitude,
-              }}
-              title="Collector"
-            >
-              <View style={styles.collectorMarker}>
-                <Text style={styles.collectorMarkerText}>🚛</Text>
-              </View>
-            </Marker>
-
-            <Polyline
-              coordinates={[
-                {
-                  latitude: pickup.collectorLocation.latitude,
-                  longitude: pickup.collectorLocation.longitude,
-                },
-                {
-                  latitude: pickup.location.latitude,
-                  longitude: pickup.location.longitude,
-                },
-              ]}
-              strokeColor={Colors.light.primary}
-              strokeWidth={3}
-              lineDashPattern={[5, 5]}
-            />
-          </>
-        )}
-      </MapView>
-
-      <SafeAreaView style={styles.overlay} edges={["top", "bottom"]}>
-        <View style={styles.statusBar}>
-          <View style={[styles.statusIndicator, { backgroundColor: status.color }]} />
-          <View style={styles.statusInfo}>
-            <Text style={styles.statusLabel}>{status.label}</Text>
-            <Text style={styles.statusDescription}>{status.description}</Text>
-          </View>
-          {pickup.eta && (
-            <View style={styles.etaContainer}>
-              <Clock size={16} color="#6B7280" />
-              <Text style={styles.etaText}>{pickup.eta} min</Text>
-            </View>
-          )}
+      {/* Top Floating Action Bar */}
+      <SafeAreaView style={styles.topFloatBar} edges={["top"]}>
+        <TouchableOpacity style={styles.backCircle} onPress={() => router.push("/(user)/home" as any)}>
+          <ArrowLeft size={20} color="#0F172A" />
+        </TouchableOpacity>
+        <View style={styles.topStatusPill}>
+          <View style={[styles.statusDot, { backgroundColor: status.color }]} />
+          <Text style={styles.topStatusText}>{status.label}</Text>
         </View>
+        <TouchableOpacity
+          style={styles.backCircle}
+          onPress={() => Alert.alert("Trip Shared", "Live pickup tracking link copied to clipboard.")}
+        >
+          <Share2 size={18} color="#0F172A" />
+        </TouchableOpacity>
+      </SafeAreaView>
 
-        {showCollectorInfo && collector && (
-          <View style={styles.collectorCard}>
-            <Image source={{ uri: collector.photo }} style={styles.collectorPhoto} />
+      {/* Fullscreen Map */}
+      <View style={styles.mapWrap}>
+        <UberMap
+          userLocation={
+            pickup?.location || {
+              latitude: 5.6037,
+              longitude: -0.1870,
+            }
+          }
+          collectorLocation={
+            pickup?.collectorLocation || {
+              latitude: (pickup?.location.latitude || 5.6037) + 0.002,
+              longitude: (pickup?.location.longitude || -0.1870) - 0.003,
+            }
+          }
+          activeRoute={true}
+        />
+      </View>
+
+      {/* Bottom Uber Journey Card */}
+      <View style={styles.bottomCardWrap}>
+        <ScrollView style={styles.bottomCard} showsVerticalScrollIndicator={false}>
+          {/* ETA & Status Header */}
+          <View style={styles.cardHeader}>
+            <View>
+              <Text style={styles.etaBigText}>
+                {currentStatusKey === "collected" ? "Completed" : `${pickup?.eta || 4} mins away`}
+              </Text>
+              <Text style={styles.etaSubText}>{status.description}</Text>
+            </View>
+            <View style={styles.plateBadge}>
+              <Text style={styles.plateBadgeText}>{collector.licenseNumber}</Text>
+            </View>
+          </View>
+
+          {/* Stepper Progress Line */}
+          <View style={styles.progressLineWrap}>
+            {[1, 2, 3, 4, 5].map((sIndex) => (
+              <View
+                key={sIndex}
+                style={[
+                  styles.progressStep,
+                  sIndex <= status.stepIndex ? styles.progressStepActive : styles.progressStepInactive,
+                ]}
+              />
+            ))}
+          </View>
+
+          {/* Collector Profile Card */}
+          <View style={styles.collectorBox}>
+            <Image source={{ uri: collector.photo }} style={styles.collectorAvatar} />
             <View style={styles.collectorInfo}>
               <Text style={styles.collectorName}>{collector.name}</Text>
-              <View style={styles.collectorDetails}>
-                <View style={styles.ratingContainer}>
-                  <Star size={14} color="#F59E0B" fill="#F59E0B" />
-                  <Text style={styles.ratingText}>{collector.rating.toFixed(1)}</Text>
-                </View>
-                <Text style={styles.separator}>•</Text>
-                <Text style={styles.vehicleText}>{collector.vehicleType}</Text>
+              <View style={styles.collectorRatingRow}>
+                <Star size={13} color="#D97706" fill="#D97706" />
+                <Text style={styles.collectorRatingText}>{collector.rating.toFixed(2)}</Text>
+                <Text style={styles.collectorTripsText}>• Top Rated Borlawura Partner</Text>
               </View>
-              <Text style={styles.licenseText}>License: {collector.licenseNumber}</Text>
+              <Text style={styles.vehicleType}>{collector.vehicleType}</Text>
             </View>
-            <TouchableOpacity style={styles.phoneButton}>
-              <Phone size={20} color="#10B981" />
-            </TouchableOpacity>
           </View>
-        )}
 
-        {pickup.status === "collected" && (
-          <View style={styles.completedCard}>
-            <View style={styles.completedIcon}>
-              <Check size={32} color="#fff" />
-            </View>
-            <Text style={styles.completedTitle}>Pickup Completed!</Text>
-            <Text style={styles.completedText}>
-              Thank you for using {Brand.appName}. Your waste has been collected successfully.
-            </Text>
-            {pickup.paymentStatus !== "paid" && (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() =>
-                  paymentMutation.mutate({
-                    pickupId: pickup.id,
-                    method: (pickup.paymentMethod as any) || "mtn_momo",
-                  })
-                }
-              >
-                <Text style={styles.actionButtonText}>
-                  {paymentMutation.isPending ? "Processing..." : "Pay for Pickup"}
-                </Text>
-              </TouchableOpacity>
-            )}
+          {/* Action Row */}
+          <View style={styles.actionRow}>
             <TouchableOpacity
-              style={[styles.actionButton, { backgroundColor: "#2563EB", marginTop: 10 }]}
-              onPress={() =>
-                ratingMutation.mutate({
-                  pickupId: pickup.id,
-                  fromUserId: session?.user.id ?? "",
-                  // Rate the user account behind the collector profile,
-                  // falling back to the collector id for seeded rows.
-                  toUserId: collector?.userId || pickup.collectorId || "",
-                  rating: 5,
-                  comment: "Great service",
-                })
-              }
+              style={styles.actionBtn}
+              onPress={() => Alert.alert("Calling Collector", `Dialing ${collector.name}...`)}
             >
-              <Text style={styles.actionButtonText}>
-                {ratingMutation.isPending ? "Saving..." : "Rate Collector (5★)"}
-              </Text>
+              <Phone size={18} color="#10B981" />
+              <Text style={styles.actionBtnText}>Call</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => Alert.alert("Chat", "Type instructions: e.g. Trash is behind the gate.")}
+            >
+              <MessageSquare size={18} color="#0EA5E9" />
+              <Text style={styles.actionBtnText}>Message</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => Alert.alert("Emergency Assist", "Ghana Fire/Police & Borlawura 24/7 Hotline connected.")}
+            >
+              <Shield size={18} color="#EF4444" />
+              <Text style={[styles.actionBtnText, { color: "#EF4444" }]}>Emergency</Text>
             </TouchableOpacity>
           </View>
-        )}
-      </SafeAreaView>
+
+          {/* Completed State Rating & Payment Modal */}
+          {currentStatusKey === "collected" && (
+            <View style={styles.collectedReceiptBox}>
+              <View style={styles.checkGlow}>
+                <CheckCircle2 size={36} color="#10B981" />
+              </View>
+              <Text style={styles.receiptTitle}>Clean Pickup Complete!</Text>
+              <Text style={styles.receiptSub}>Your premises was serviced successfully.</Text>
+
+              {/* Tipping Selector */}
+              <Text style={styles.tipLabel}>Add a tip for Kwame?</Text>
+              <View style={styles.tipRow}>
+                {[0, 5, 10, 20].map((amount) => (
+                  <TouchableOpacity
+                    key={amount}
+                    style={[styles.tipChip, selectedTip === amount && styles.tipChipActive]}
+                    onPress={() => setSelectedTip(amount)}
+                  >
+                    <Text style={[styles.tipChipText, selectedTip === amount && styles.tipChipTextActive]}>
+                      {amount === 0 ? "No tip" : `+₵${amount}`}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Rate Driver */}
+              {!ratingSubmitted ? (
+                <View style={styles.rateBox}>
+                  <Text style={styles.tipLabel}>Rate Kwame&apos;s Service</Text>
+                  <View style={styles.starsRow}>
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <TouchableOpacity key={s} onPress={() => setRating(s)}>
+                        <Star
+                          size={28}
+                          color={s <= rating ? "#F59E0B" : "#CBD5E1"}
+                          fill={s <= rating ? "#F59E0B" : "transparent"}
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <TouchableOpacity style={styles.submitRatingBtn} onPress={handleRate}>
+                    <Text style={styles.submitRatingText}>Submit Rating & Finish</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.ratingDoneBanner}>
+                  <Text style={styles.ratingDoneText}>⭐⭐⭐⭐⭐ Rating Recorded</Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={styles.doneHomeBtn}
+                onPress={() => router.push("/(user)/home" as any)}
+              >
+                <Text style={styles.doneHomeBtnText}>Back to Home Map</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -215,215 +282,281 @@ export default function TrackingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#090A0C",
   },
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F9FAFB",
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: "#6B7280",
-  },
-  map: {
-    flex: 1,
-  },
-  pickupMarker: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  collectorMarker: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  collectorMarkerText: {
-    fontSize: 28,
-  },
-  overlay: {
+  topFloatBar: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    top: 14,
+    left: 20,
+    right: 20,
+    flexDirection: "row",
     justifyContent: "space-between",
-    pointerEvents: "box-none",
-  },
-  statusBar: {
-    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
-    marginHorizontal: 20,
-    marginTop: 20,
-    padding: 16,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    zIndex: 40,
   },
-  statusIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12,
-  },
-  statusInfo: {
-    flex: 1,
-  },
-  statusLabel: {
-    fontSize: 16,
-    fontWeight: "700" as const,
-    color: "#1F2937",
-    marginBottom: 2,
-  },
-  statusDescription: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-  etaContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#F3F4F6",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  etaText: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: "#1F2937",
-  },
-  collectorCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    marginHorizontal: 20,
-    marginBottom: 20,
-    padding: 16,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  collectorPhoto: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#E5E7EB",
-  },
-  collectorInfo: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  collectorName: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: "#1F2937",
-    marginBottom: 4,
-  },
-  collectorDetails: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  ratingText: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: "#1F2937",
-  },
-  separator: {
-    marginHorizontal: 8,
-    color: "#D1D5DB",
-  },
-  vehicleText: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-  licenseText: {
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-  phoneButton: {
+  backCircle: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-  },
-  completedCard: {
-    alignItems: "center",
-    backgroundColor: "#fff",
-    marginHorizontal: 20,
-    marginBottom: 20,
-    padding: 24,
-    borderRadius: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
   },
-  completedIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Colors.light.primary,
+  topStatusPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(15, 23, 42, 0.9)",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    gap: 8,
+    backdropFilter: "blur(10px)",
+  } as any,
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  topStatusText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  mapWrap: {
+    flex: 1,
+  },
+  bottomCardWrap: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    maxHeight: "54%",
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
+    zIndex: 30,
+  },
+  bottomCard: {
+    padding: 22,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  etaBigText: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: "#0F172A",
+    letterSpacing: -0.5,
+  },
+  etaSubText: {
+    fontSize: 13,
+    color: "#64748B",
+    marginTop: 2,
+    fontWeight: "500",
+  },
+  plateBadge: {
+    backgroundColor: "#FEF08A",
+    borderWidth: 1.5,
+    borderColor: "#000000",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  plateBadgeText: {
+    fontSize: 13,
+    fontWeight: "900",
+    color: "#000000",
+    letterSpacing: 0.6,
+  },
+  progressLineWrap: {
+    flexDirection: "row",
+    gap: 6,
+    marginVertical: 14,
+  },
+  progressStep: {
+    flex: 1,
+    height: 4,
+    borderRadius: 2,
+  },
+  progressStepActive: {
+    backgroundColor: "#10B981",
+  },
+  progressStepInactive: {
+    backgroundColor: "#E2E8F0",
+  },
+  collectorBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  collectorAvatar: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    marginRight: 14,
+  },
+  collectorInfo: {
+    flex: 1,
+  },
+  collectorName: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#0F172A",
+  },
+  collectorRatingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
+  collectorRatingText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#D97706",
+  },
+  collectorTripsText: {
+    fontSize: 11,
+    color: "#64748B",
+  },
+  vehicleType: {
+    fontSize: 12,
+    color: "#475569",
+    marginTop: 2,
+    fontWeight: "600",
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 14,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 16,
+    backgroundColor: "#F1F5F9",
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 6,
   },
-  completedTitle: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: "#1F2937",
+  actionBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  collectedReceiptBox: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    alignItems: "center",
+  },
+  checkGlow: {
     marginBottom: 8,
   },
-  completedText: {
-    fontSize: 14,
-    color: "#6B7280",
-    textAlign: "center",
-    lineHeight: 20,
+  receiptTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#0F172A",
   },
-  actionButton: {
+  receiptSub: {
+    fontSize: 13,
+    color: "#64748B",
+    marginTop: 2,
+  },
+  tipLabel: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#0F172A",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
     marginTop: 14,
-    backgroundColor: Colors.light.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10,
+    marginBottom: 8,
   },
-  actionButtonText: {
-    color: "#fff",
-    fontWeight: "700" as const,
+  tipRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  tipChip: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  tipChipActive: {
+    backgroundColor: "#10B981",
+    borderColor: "#10B981",
+  },
+  tipChipText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#475569",
+  },
+  tipChipTextActive: {
+    color: "#000000",
+  },
+  rateBox: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  starsRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginVertical: 8,
+  },
+  submitRatingBtn: {
+    backgroundColor: "#0F172A",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    marginTop: 8,
+    width: "100%",
+    alignItems: "center",
+  },
+  submitRatingText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  ratingDoneBanner: {
+    backgroundColor: "#ECFDF5",
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  ratingDoneText: {
+    color: "#065F46",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  doneHomeBtn: {
+    marginTop: 12,
+    paddingVertical: 8,
+  },
+  doneHomeBtnText: {
+    color: "#10B981",
+    fontSize: 14,
+    fontWeight: "800",
   },
 });

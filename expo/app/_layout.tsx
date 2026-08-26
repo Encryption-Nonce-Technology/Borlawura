@@ -16,17 +16,12 @@ const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   return (
-    <Stack
-      screenOptions={{
-        headerBackTitle: "Back",
-        headerStyle: { backgroundColor: Colors.light.primary },
-        headerTintColor: "#fff",
-        headerTitleStyle: { fontWeight: "600" as const },
-        headerTitle: Brand.appName,
-      }}
-    >
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      {/* Screens in the (user), (collector) and (admin) groups configure their own headers. */}
+      <Stack.Screen name="(user)" options={{ headerShown: false }} />
+      <Stack.Screen name="(collector)" options={{ headerShown: false }} />
+      <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
@@ -56,21 +51,27 @@ export default function RootLayout() {
 
     if (!session) return;
 
-    if (rootSegment === "(auth)") {
-      router.replace("/" as any);
+    if (rootSegment === "(auth)" || !rootSegment) {
+      if (session.user.role === "collector") {
+        router.replace("/(collector)/home" as any);
+      } else if (session.user.role === "admin") {
+        router.replace("/(admin)/dashboard" as any);
+      } else {
+        router.replace("/(user)/home" as any);
+      }
       return;
     }
 
     if (inAdminGroup && session.user.role !== "admin") {
-      router.replace("/" as any);
+      router.replace("/(user)/home" as any);
       return;
     }
     if (inCollectorGroup && !["collector", "admin"].includes(session.user.role)) {
-      router.replace("/" as any);
+      router.replace("/(user)/home" as any);
       return;
     }
     if (inUserGroup && !["user", "admin"].includes(session.user.role)) {
-      router.replace("/" as any);
+      router.replace("/(collector)/home" as any);
     }
   }, [loading, router, segments, session]);
 

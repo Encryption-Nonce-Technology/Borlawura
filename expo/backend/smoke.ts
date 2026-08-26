@@ -82,16 +82,17 @@ async function main() {
 
   // --- User creates a pickup ------------------------------------------------
   const pickup = await guest.client.pickups.create.mutate({
-    photos: ["https://images.unsplash.com/photo-1532999122724-e3c354a0b15b?w=800&q=60"],
-    trashType: "mixed",
-    quantity: "sack",
-    location: { latitude: 5.6045, longitude: -0.189 },
-    address: "1 Smoke Test Lane, Accra",
+    photos: ["https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=700&q=60"],
+    trashType: "plastic",
+    quantity: "small",
+    location: { latitude: 5.6037, longitude: -0.187 },
+    address: "East Legon, Accra",
     isUrgent: false,
     communityCode: undefined,
     subscriptionPlan: undefined,
     paymentMethod: "mtn_momo",
   });
+  if (!pickup) throw new Error("Pickup failed to create");
   assert(pickup.status === "searching" && pickup.price > 0, `pickup created (₵${pickup.price})`);
 
   // Accept quickly before the demo auto-assign timer races us.

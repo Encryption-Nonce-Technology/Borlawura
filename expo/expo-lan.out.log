@@ -42,3 +42,360 @@ Web Bundled 11415ms node_modules\expo-router\entry.js (2678 modules)
 Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
 Web Bundled 112ms node_modules\expo-router\entry.js (1 module)
  LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 92ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+ ERROR  SyntaxError: I:\Projects\Borlawura\expo\app\_layout.tsx: Unexpected reserved word 'await'. (60:24)
+
+  58 |
+  59 |       try {
+> 60 |         const allKeys = await AsyncStorage.getAllKeys();
+     |                         ^
+  61 |         const queueKeys = allKeys.filter((key) => key.startsWith("offline-pickup-"));
+  62 |         for (const key of queueKeys) {
+  63 |           const raw = await AsyncStorage.getItem(key);
+    at constructor (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:365:19)
+    at TypeScriptParserMixin.raise (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:6599:19)
+    at TypeScriptParserMixin.checkReservedWord (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12231:12)
+    at TypeScriptParserMixin.checkReservedWord (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9310:13)
+    at TypeScriptParserMixin.parseIdentifierName (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12211:12)
+    at TypeScriptParserMixin.parseIdentifier (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12181:23)
+    at TypeScriptParserMixin.parseExprAtom (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11416:27)
+    at TypeScriptParserMixin.parseExprAtom (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:4764:20)
+    at TypeScriptParserMixin.parseExprSubscripts (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11081:23)
+    at TypeScriptParserMixin.parseUpdate (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11066:21)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11046:23)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9837:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10899:61)
+    at TypeScriptParserMixin.parseExprOps (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10904:23)
+    at TypeScriptParserMixin.parseMaybeConditional (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10881:23)
+    at TypeScriptParserMixin.parseMaybeAssign (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10831:21)
+    at TypeScriptParserMixin.parseMaybeAssign (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9786:20)
+    at I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10800:39
+    at TypeScriptParserMixin.allowInAnd (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12421:16)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10800:17)
+    at TypeScriptParserMixin.parseVar (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13384:91)
+    at TypeScriptParserMixin.parseVarStatement (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13230:10)
+    at TypeScriptParserMixin.parseVarStatement (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9408:31)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12851:23)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9508:18)
+    at TypeScriptParserMixin.parseStatementLike (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12767:17)
+    at TypeScriptParserMixin.parseStatementListItem (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12747:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13316:61)
+    at TypeScriptParserMixin.parseBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13309:10)
+    at TypeScriptParserMixin.parseBlock (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13297:10)
+    at TypeScriptParserMixin.parseTryStatement (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13205:23)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12804:21)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9508:18)
+    at TypeScriptParserMixin.parseStatementLike (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12767:17)
+    at TypeScriptParserMixin.parseStatementListItem (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12747:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13316:61)
+    at TypeScriptParserMixin.parseBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13309:10)
+    at TypeScriptParserMixin.parseBlock (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13297:10)
+    at TypeScriptParserMixin.parseFunctionBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12100:24)
+    at TypeScriptParserMixin.parseArrowExpression (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12075:10)
+    at TypeScriptParserMixin.parseParenAndDistinguishExpression (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11687:12)
+    at TypeScriptParserMixin.parseExprAtom (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11331:23)
+    at TypeScriptParserMixin.parseExprAtom (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:4764:20)
+    at TypeScriptParserMixin.parseExprSubscripts (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11081:23)
+    at TypeScriptParserMixin.parseUpdate (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11066:21)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11046:23)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9837:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10899:61)
+    at TypeScriptParserMixin.parseExprOps (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10904:23)
+    at TypeScriptParserMixin.parseMaybeConditional (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10881:23)
+ ERROR  SyntaxError: I:\Projects\Borlawura\expo\app\_layout.tsx: 'import' and 'export' may only appear at the top level. (39:0)
+
+  37 |   const segments = useSegments();
+  38 |   const { session, loading } = useSession();
+> 39 | import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+     | ^
+  40 | import AsyncStorage from "@react-native-async-storage/async-storage";
+  41 | import { Stack, useRouter, useSegments } from "expo-router";
+  42 | import * as SplashScreen from "expo-splash-screen";
+    at constructor (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:365:19)
+    at TypeScriptParserMixin.raise (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:6599:19)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12871:18)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9508:18)
+    at TypeScriptParserMixin.parseStatementLike (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12767:17)
+    at TypeScriptParserMixin.parseStatementListItem (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12747:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13316:61)
+    at TypeScriptParserMixin.parseBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13309:10)
+    at TypeScriptParserMixin.parseBlock (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13297:10)
+    at TypeScriptParserMixin.parseFunctionBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12100:24)
+    at TypeScriptParserMixin.parseFunctionBodyAndFinish (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12086:10)
+    at TypeScriptParserMixin.parseFunctionBodyAndFinish (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9172:18)
+    at I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13445:12
+    at TypeScriptParserMixin.withSmartMixTopicForbiddingContext (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12403:14)
+    at TypeScriptParserMixin.parseFunction (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13444:10)
+    at TypeScriptParserMixin.parseExportDefaultExpression (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13907:19)
+    at TypeScriptParserMixin.parseExportDefaultExpression (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9402:18)
+    at TypeScriptParserMixin.parseExport (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13828:25)
+    at TypeScriptParserMixin.parseExport (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9385:20)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12878:27)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9508:18)
+    at TypeScriptParserMixin.parseStatementLike (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12767:17)
+    at TypeScriptParserMixin.parseModuleItem (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12744:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13316:36)
+    at TypeScriptParserMixin.parseBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13309:10)
+    at TypeScriptParserMixin.parseProgram (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12622:10)
+    at TypeScriptParserMixin.parseTopLevel (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12612:25)
+    at TypeScriptParserMixin.parse (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:14488:25)
+    at TypeScriptParserMixin.parse (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10126:18)
+    at parse (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:14501:26)
+    at parser (I:\Projects\Borlawura\expo\node_modules\@babel\core\lib\parser\index.js:41:34)
+    at parser.next (<anonymous>)
+    at normalizeFile (I:\Projects\Borlawura\expo\node_modules\@babel\core\lib\transformation\normalize-file.js:64:37)
+    at normalizeFile.next (<anonymous>)
+    at run (I:\Projects\Borlawura\expo\node_modules\@babel\core\lib\transformation\index.js:22:50)
+    at run.next (<anonymous>)
+    at transform (I:\Projects\Borlawura\expo\node_modules\@babel\core\lib\transform.js:22:33)
+    at transform.next (<anonymous>)
+    at evaluateSync (I:\Projects\Borlawura\expo\node_modules\gensync\index.js:251:28)
+    at sync (I:\Projects\Borlawura\expo\node_modules\gensync\index.js:89:14)
+    at stopHiding - secret - don't use this - v1 (I:\Projects\Borlawura\expo\node_modules\@babel\core\lib\errors\rewrite-stack-trace.js:47:12)
+    at Object.transformSync (I:\Projects\Borlawura\expo\node_modules\@babel\core\lib\transform.js:42:76)
+    at parseWithBabel (I:\Projects\Borlawura\expo\node_modules\@expo\metro-config\build\transformSync.js:75:18)
+    at transformSync (I:\Projects\Borlawura\expo\node_modules\@expo\metro-config\build\transformSync.js:54:16)
+    at Object.transform (I:\Projects\Borlawura\expo\node_modules\@expo\metro-config\build\babel-transformer.js:127:58)
+    at Object.transform (I:\Projects\Borlawura\expo\node_modules\@rork-ai\toolkit-sdk\metro\transformer.js:128:30)
+    at transformJSWithBabel (I:\Projects\Borlawura\expo\node_modules\@expo\metro-config\build\transform-worker\metro-transform-worker.js:468:47)
+    at Object.transform (I:\Projects\Borlawura\expo\node_modules\@expo\metro-config\build\transform-worker\metro-transform-worker.js:583:12)
+    at Object.transform (I:\Projects\Borlawura\expo\node_modules\@expo\metro-config\build\transform-worker\transform-worker.js:178:19)
+    at Object.transform (I:\Projects\Borlawura\expo\node_modules\@expo\metro-config\build\transform-worker\supervising-transform-worker.js:94:25)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 164ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 132ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 124ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 116ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 100ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 111ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 105ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 122ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 132ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 114ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 117ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 71ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 96ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 85ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 95ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 86ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 104ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 101ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 93ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 70ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 80ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 95ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 86ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 86ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 99ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+ ERROR  SyntaxError: I:\Projects\Borlawura\expo\app\(user)\trash-details.tsx: Unexpected token, expected "," (113:12)
+
+  111 |         },
+  112 |         address,
+> 113 |         JSON.stringify({
+      |             ^
+  114 |           photos,
+  115 |           trashType: selectedType,
+  116 |           quantity: selectedQuantity,
+    at constructor (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:365:19)
+    at TypeScriptParserMixin.raise (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:6599:19)
+    at TypeScriptParserMixin.unexpected (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:6619:16)
+    at TypeScriptParserMixin.expect (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:6899:12)
+    at TypeScriptParserMixin.parseObjectLike (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11822:14)
+    at TypeScriptParserMixin.parseExprAtom (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11339:23)
+    at TypeScriptParserMixin.parseExprAtom (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:4764:20)
+    at TypeScriptParserMixin.parseExprSubscripts (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11081:23)
+    at TypeScriptParserMixin.parseUpdate (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11066:21)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11046:23)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9837:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10899:61)
+    at TypeScriptParserMixin.parseExprOps (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10904:23)
+    at TypeScriptParserMixin.parseMaybeConditional (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10881:23)
+    at TypeScriptParserMixin.parseMaybeAssign (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10831:21)
+    at TypeScriptParserMixin.parseMaybeAssign (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9786:20)
+    at I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10800:39
+    at TypeScriptParserMixin.allowInAnd (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12426:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10800:17)
+    at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12493:17)
+    at TypeScriptParserMixin.parseExprListItem (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12175:18)
+    at TypeScriptParserMixin.parseCallExpressionArguments (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11252:22)
+    at TypeScriptParserMixin.parseCoverCallAndAsyncArrowHead (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11186:29)
+    at TypeScriptParserMixin.parseSubscript (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11120:19)
+    at TypeScriptParserMixin.parseSubscript (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9272:18)
+    at TypeScriptParserMixin.parseSubscripts (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11094:19)
+    at TypeScriptParserMixin.parseExprSubscripts (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11085:17)
+    at TypeScriptParserMixin.parseUpdate (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11066:21)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11046:23)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9837:18)
+    at TypeScriptParserMixin.parseAwait (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12278:28)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11015:25)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9837:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10899:61)
+    at TypeScriptParserMixin.parseExprOps (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10904:23)
+    at TypeScriptParserMixin.parseMaybeConditional (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10881:23)
+    at TypeScriptParserMixin.parseMaybeAssign (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10831:21)
+    at TypeScriptParserMixin.parseMaybeAssign (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9786:20)
+    at I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10800:39
+    at TypeScriptParserMixin.allowInAnd (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12421:16)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10800:17)
+    at TypeScriptParserMixin.parseVar (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13384:91)
+    at TypeScriptParserMixin.parseVarStatement (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13230:10)
+    at TypeScriptParserMixin.parseVarStatement (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9408:31)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12851:23)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9508:18)
+    at TypeScriptParserMixin.parseStatementLike (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12767:17)
+    at TypeScriptParserMixin.parseStatementListItem (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12747:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13316:61)
+    at TypeScriptParserMixin.parseBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13309:10)
+ ERROR  SyntaxError: I:\Projects\Borlawura\expo\app\(user)\trash-details.tsx: 'import' and 'export' may only appear at the top level. (97:0)
+
+   95 |
+   96 |   const handleConfirm = async () => {
+>  97 | import { useLocalSearchParams, router } from "expo-router";
+      | ^
+   98 | import AsyncStorage from "@react-native-async-storage/async-storage";
+   99 | import * as Location from "expo-location";
+  100 | import { Package } from "lucide-react-native";
+    at constructor (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:365:19)
+    at TypeScriptParserMixin.raise (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:6599:19)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12871:18)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9508:18)
+    at TypeScriptParserMixin.parseStatementLike (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12767:17)
+    at TypeScriptParserMixin.parseStatementListItem (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12747:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13316:61)
+    at TypeScriptParserMixin.parseBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13309:10)
+    at TypeScriptParserMixin.parseBlock (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13297:10)
+    at TypeScriptParserMixin.parseFunctionBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12100:24)
+    at TypeScriptParserMixin.parseArrowExpression (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12075:10)
+    at TypeScriptParserMixin.parseAsyncArrowFromCallExpression (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11264:10)
+    at TypeScriptParserMixin.parseAsyncArrowFromCallExpression (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9766:18)
+    at TypeScriptParserMixin.parseCoverCallAndAsyncArrowHead (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11194:27)
+    at TypeScriptParserMixin.parseSubscript (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11120:19)
+    at TypeScriptParserMixin.parseSubscript (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9272:18)
+    at TypeScriptParserMixin.parseSubscripts (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11094:19)
+    at TypeScriptParserMixin.parseExprSubscripts (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11085:17)
+    at TypeScriptParserMixin.parseUpdate (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11066:21)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:11046:23)
+    at TypeScriptParserMixin.parseMaybeUnary (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9837:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10899:61)
+    at TypeScriptParserMixin.parseExprOps (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10904:23)
+    at TypeScriptParserMixin.parseMaybeConditional (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10881:23)
+    at TypeScriptParserMixin.parseMaybeAssign (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10831:21)
+    at TypeScriptParserMixin.parseMaybeAssign (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9786:20)
+    at I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10800:39
+    at TypeScriptParserMixin.allowInAnd (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12421:16)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:10800:17)
+    at TypeScriptParserMixin.parseVar (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13384:91)
+    at TypeScriptParserMixin.parseVarStatement (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13230:10)
+    at TypeScriptParserMixin.parseVarStatement (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9408:31)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12851:23)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9508:18)
+    at TypeScriptParserMixin.parseStatementLike (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12767:17)
+    at TypeScriptParserMixin.parseStatementListItem (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12747:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13316:61)
+    at TypeScriptParserMixin.parseBlockBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13309:10)
+    at TypeScriptParserMixin.parseBlock (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13297:10)
+    at TypeScriptParserMixin.parseFunctionBody (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12100:24)
+    at TypeScriptParserMixin.parseFunctionBodyAndFinish (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12086:10)
+    at TypeScriptParserMixin.parseFunctionBodyAndFinish (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9172:18)
+    at I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13445:12
+    at TypeScriptParserMixin.withSmartMixTopicForbiddingContext (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12403:14)
+    at TypeScriptParserMixin.parseFunction (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13444:10)
+    at TypeScriptParserMixin.parseExportDefaultExpression (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13907:19)
+    at TypeScriptParserMixin.parseExportDefaultExpression (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9402:18)
+    at TypeScriptParserMixin.parseExport (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:13828:25)
+    at TypeScriptParserMixin.parseExport (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:9385:20)
+    at TypeScriptParserMixin.parseStatementContent (I:\Projects\Borlawura\expo\node_modules\@babel\parser\lib\index.js:12878:27)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 99ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 118ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 106ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 117ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 93ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 80ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 107ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 81ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 95ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 91ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 87ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 69ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 94ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 80ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 91ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console

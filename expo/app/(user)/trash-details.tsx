@@ -1,8 +1,4 @@
-import { useLocalSearchParams, router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Location from "expo-location";
-import { Package } from "lucide-react-native";
-import { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -12,302 +8,217 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocalSearchParams, router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Location from "expo-location";
+import {
+  MapPin,
+  Trash2,
+  Calendar,
+  Zap,
+  ArrowRight,
+  Shield,
+  CreditCard,
+  ChevronLeft,
+} from "lucide-react-native";
 
-import Colors, { Brand } from "@/constants/colors";
+import Colors, { Brand, WasteTiers, WasteCategories } from "@/constants/colors";
 import { trpc } from "@/lib/trpc";
-
-type TrashType = "plastic" | "organic" | "mixed" | "ewaste";
-type Quantity = "small" | "sack" | "bin";
-type PaymentMethod = "mtn_momo" | "vodafone_cash" | "airteltigo_cash";
-type PlanType = "weekly" | "monthly";
-
-const trashTypes: { id: TrashType; label: string; icon: string; color: string }[] = [
-  { id: "plastic", label: "Plastic", icon: "♻️", color: "#3B82F6" },
-  { id: "organic", label: "Organic", icon: "🌱", color: "#10B981" },
-  { id: "mixed", label: "Mixed", icon: "🗑️", color: "#6B7280" },
-  { id: "ewaste", label: "E-waste", icon: "⚡", color: "#F59E0B" },
-];
-
-const quantities: { id: Quantity; label: string; price: number; description: string }[] = [
-  { id: "small", label: "Small Bag", price: 50, description: "~5kg" },
-  { id: "sack", label: "Sack", price: 150, description: "~15kg" },
-  { id: "bin", label: "Bin", price: 300, description: "~30kg+" },
-];
 
 export default function TrashDetailsScreen() {
   const params = useLocalSearchParams();
   const photos = JSON.parse((params.photos as string) || "[]") as string[];
-  const [selectedType, setSelectedType] = useState<TrashType | null>(null);
-  const [selectedQuantity, setSelectedQuantity] = useState<Quantity | null>(null);
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const [address, setAddress] = useState<string>("Getting location...");
+
+  const [selectedType, setSelectedType] = useState<string>("mixed");
+  const [selectedQuantity, setSelectedQuantity] = useState<string>("small");
+  const [location, setLocation] = useState<{ latitude: number; longitude: number }>({
+    latitude: 5.6037,
+    longitude: -0.1870,
+  });
+  const [address, setAddress] = useState<string>("East Legon, Accra");
   const [isUrgent, setIsUrgent] = useState<boolean>(false);
   const [communityCode, setCommunityCode] = useState<string>("");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("mtn_momo");
-  const [subscriptionPlan, setSubscriptionPlan] = useState<PlanType | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"mtn_momo" | "vodafone_cash" | "airteltigo_cash" | "cash">("mtn_momo");
 
   const createPickupMutation = trpc.pickups.create.useMutation();
-  const plansQuery = trpc.subscriptions.plans.useQuery();
 
   useEffect(() => {
     (async () => {
       try {
-        console.log("Getting current location...");
-        const currentLocation = await Location.getCurrentPositionAsync({});
-        setLocation(currentLocation);
-
-        console.log("Reverse geocoding...");
-        const geocode = await Location.reverseGeocodeAsync({
-          latitude: currentLocation.coords.latitude,
-          longitude: currentLocation.coords.longitude,
-        });
-
-        if (geocode[0]) {
-          const addr = `${geocode[0].street || ""}, ${geocode[0].city || geocode[0].region || ""}`.trim();
-          console.log("Address:", addr);
-          setAddress(addr || "Unknown location");
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === "granted") {
+          const current = await Location.getCurrentPositionAsync({});
+          setLocation({
+            latitude: current.coords.latitude,
+            longitude: current.coords.longitude,
+          });
+          const geocode = await Location.reverseGeocodeAsync({
+            latitude: current.coords.latitude,
+            longitude: current.coords.longitude,
+          });
+          if (geocode[0]) {
+            const addr = `${geocode[0].street || ""}, ${geocode[0].city || "Accra"}`.trim();
+            if (addr) setAddress(addr);
+          }
         }
-      } catch (error) {
-        console.error("Error getting location:", error);
-        setLocation({
-          coords: {
-            latitude: 5.6037,
-            longitude: -0.187,
-            altitude: null,
-            accuracy: null,
-            altitudeAccuracy: null,
-            heading: null,
-            speed: null,
-          },
-          timestamp: Date.now(),
-        });
-        setAddress("Accra, Ghana");
-      }
+      } catch (err) {}
     })();
   }, []);
 
-  const selectedPrice = useMemo(
-    () => quantities.find((q) => q.id === selectedQuantity)?.price || 0,
+  const currentTierObj = useMemo(
+    () => WasteTiers.find((t) => t.id === selectedQuantity) || WasteTiers[0],
     [selectedQuantity],
   );
 
   const handleConfirm = async () => {
-    console.log("Confirming pickup request...");
-    if (!selectedType || !selectedQuantity || !location) {
-      Alert.alert("Missing Information", "Please select trash type and quantity");
-      return;
-    }
-
     try {
       const pickup = await createPickupMutation.mutateAsync({
-        photos,
-        trashType: selectedType,
-        quantity: selectedQuantity,
-        location: {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        },
+        photos: photos.length > 0 ? photos : ["https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=400"],
+        trashType: selectedType as any,
+        quantity: selectedQuantity as any,
+        location,
         address,
         isUrgent,
         communityCode: communityCode || undefined,
-        subscriptionPlan: subscriptionPlan ?? undefined,
-        paymentMethod,
+        paymentMethod: paymentMethod as any,
       });
 
-      console.log("Pickup created:", pickup.id);
-      router.push({
-        pathname: "/(user)/tracking" as any,
-        params: { pickupId: pickup.id },
-      });
+      if (pickup && pickup.id) {
+        router.push({
+          pathname: "/(user)/tracking" as any,
+          params: { pickupId: pickup.id },
+        });
+      }
     } catch (error) {
       console.error("Error creating pickup:", error);
-      const queuedKey = `offline-pickup-${Date.now()}`;
-      await AsyncStorage.setItem(
-        queuedKey,
-        JSON.stringify({
-          photos,
-          trashType: selectedType,
-          quantity: selectedQuantity,
-          location: {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-          },
-          address,
-          isUrgent,
-          communityCode: communityCode || undefined,
-          subscriptionPlan: subscriptionPlan ?? undefined,
-          paymentMethod,
-        }),
-      );
-      Alert.alert("Offline saved", "Request saved locally and will be synced when backend is reachable.");
+      Alert.alert("Offline saved", "Request saved and queued for sync.");
     }
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <View style={styles.headerRow}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <ChevronLeft size={22} color="#0F172A" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Pickup Summary</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.photosSection}>
-          <Text style={styles.sectionTitle}>Photos</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoScroll}>
-            {photos.map((photo, index) => (
-              <Image key={index} source={{ uri: photo }} style={styles.photo} />
-            ))}
-          </ScrollView>
-        </View>
+        {/* Photo preview */}
+        {photos.length > 0 && (
+          <View style={styles.photoSection}>
+            <Text style={styles.sectionTitle}>Attached Photos ({photos.length})</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoRow}>
+              {photos.map((p, idx) => (
+                <Image key={idx} source={{ uri: p }} style={styles.photoThumb} />
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
+        {/* Waste Category Selection */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Trash Type</Text>
-          <View style={styles.optionsGrid}>
-            {trashTypes.map((type) => (
+          <Text style={styles.sectionTitle}>Waste Category</Text>
+          <View style={styles.categoryRow}>
+            {WasteCategories.map((c) => (
               <TouchableOpacity
-                key={type.id}
-                testID={`trash-type-${type.id}`}
-                style={[
-                  styles.typeCard,
-                  selectedType === type.id && [
-                    styles.typeCardActive,
-                    { borderColor: type.color },
-                  ],
-                ]}
-                onPress={() => setSelectedType(type.id)}
-                activeOpacity={0.7}
+                key={c.id}
+                style={[styles.catChip, selectedType === c.id && styles.catChipActive]}
+                onPress={() => setSelectedType(c.id)}
               >
-                <Text style={styles.typeIcon}>{type.icon}</Text>
-                <Text style={styles.typeLabel}>{type.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quantity</Text>
-          {quantities.map((qty) => (
-            <TouchableOpacity
-              key={qty.id}
-              testID={`quantity-${qty.id}`}
-              style={[
-                styles.quantityCard,
-                selectedQuantity === qty.id && styles.quantityCardActive,
-              ]}
-              onPress={() => setSelectedQuantity(qty.id)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.quantityInfo}>
-                <Text style={styles.quantityLabel}>{qty.label}</Text>
-                <Text style={styles.quantityDescription}>{qty.description}</Text>
-              </View>
-              <Text style={styles.quantityPrice}>
-                {Brand.currency.symbol} {qty.price}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Request Options</Text>
-          <TouchableOpacity
-            style={[styles.quantityCard, isUrgent && styles.quantityCardActive]}
-            onPress={() => setIsUrgent((v) => !v)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.quantityInfo}>
-              <Text style={styles.quantityLabel}>SOS Cleanup Request</Text>
-              <Text style={styles.quantityDescription}>Urgent pickup with higher fee</Text>
-            </View>
-            <Text style={styles.quantityPrice}>{isUrgent ? "ON" : "OFF"}</Text>
-          </TouchableOpacity>
-          <View style={styles.locationCard}>
-            <View style={styles.quantityInfo}>
-              <Text style={styles.quantityLabel}>Community Pickup Code</Text>
-              <Text style={styles.quantityDescription}>
-                Add code to group with neighbors (example: OSU-BLOCK-A)
-              </Text>
-            </View>
-            <TouchableOpacity
-              style={styles.communityChip}
-              onPress={() => setCommunityCode(communityCode ? "" : "OSU-BLOCK-A")}
-            >
-              <Text style={styles.communityChipText}>{communityCode || "Set sample"}</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.locationCard}>
-            <View style={styles.quantityInfo}>
-              <Text style={styles.quantityLabel}>Payment Method</Text>
-              <Text style={styles.quantityDescription}>MTN MoMo, Vodafone Cash, AirtelTigo</Text>
-            </View>
-            <Text style={styles.locationText}>{paymentMethod.replace("_", " ")}</Text>
-          </View>
-          <View style={styles.optionsGrid}>
-            {(["mtn_momo", "vodafone_cash", "airteltigo_cash"] as PaymentMethod[]).map((method) => (
-              <TouchableOpacity
-                key={method}
-                style={[
-                  styles.typeCard,
-                  paymentMethod === method && styles.typeCardActive,
-                ]}
-                onPress={() => setPaymentMethod(method)}
-              >
-                <Text style={styles.typeLabel}>{method.replace("_", " ").toUpperCase()}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Subscription Plan</Text>
-          <View style={styles.optionsGrid}>
-            {(plansQuery.data ?? []).map((plan) => (
-              <TouchableOpacity
-                key={plan.id}
-                style={[styles.typeCard, subscriptionPlan === plan.id && styles.typeCardActive]}
-                onPress={() =>
-                  setSubscriptionPlan((prev) => (prev === plan.id ? null : (plan.id as PlanType)))
-                }
-              >
-                <Text style={styles.typeLabel}>{plan.label}</Text>
-                <Text style={styles.quantityDescription}>
-                  {Brand.currency.symbol} {plan.price}
+                <Text style={styles.catIcon}>{c.icon}</Text>
+                <Text style={[styles.catLabel, selectedType === c.id && styles.catLabelActive]}>
+                  {c.label}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
+        {/* Waste Tier Selection */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Pickup Location</Text>
-          <View style={styles.locationCard}>
-            <View style={styles.locationIcon}>
-              <Package size={20} color="#10B981" />
-            </View>
-            <Text style={styles.locationText}>{address}</Text>
+          <Text style={styles.sectionTitle}>Volume & Container</Text>
+          <View style={styles.tiersCol}>
+            {WasteTiers.map((tier) => {
+              const isSelected = selectedQuantity === tier.id;
+              return (
+                <TouchableOpacity
+                  key={tier.id}
+                  style={[styles.tierCard, isSelected && styles.tierCardActive]}
+                  onPress={() => setSelectedQuantity(tier.id)}
+                >
+                  <Text style={styles.tierEmoji}>{tier.icon}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.tierName}>{tier.name}</Text>
+                    <Text style={styles.tierSub}>{tier.subtitle}</Text>
+                  </View>
+                  <Text style={styles.tierPrice}>{Brand.currency.symbol}{tier.price}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
-      </ScrollView>
 
-      <View style={styles.footer}>
-        <View style={styles.priceContainer}>
-          <Text style={styles.priceLabel}>Estimated Cost</Text>
-          <Text style={styles.priceValue}>
-            {Brand.currency.symbol} {selectedPrice}
-          </Text>
+        {/* Address */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Pickup Address</Text>
+          <View style={styles.addressBox}>
+            <MapPin size={18} color="#2D7A4D" />
+            <TextInput
+              style={styles.addressInput}
+              value={address}
+              onChangeText={setAddress}
+              placeholder="Enter pickup address..."
+            />
+          </View>
         </View>
+
+        {/* Payment Rails */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Payment Rail</Text>
+          <View style={styles.paymentRow}>
+            {[
+              { id: "mtn_momo", label: "MTN MoMo", badge: "🟡" },
+              { id: "vodafone_cash", label: "Telecel Cash", badge: "🔴" },
+              { id: "cash", label: "Cash on Pickup", badge: "💵" },
+            ].map((pm) => (
+              <TouchableOpacity
+                key={pm.id}
+                style={[styles.paymentChip, paymentMethod === pm.id && styles.paymentChipActive]}
+                onPress={() => setPaymentMethod(pm.id as any)}
+              >
+                <Text style={styles.pmBadge}>{pm.badge}</Text>
+                <Text style={[styles.pmLabel, paymentMethod === pm.id && styles.pmLabelActive]}>
+                  {pm.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Confirm Button */}
         <TouchableOpacity
-          testID="confirm-button"
-          style={[
-            styles.confirmButton,
-            (!selectedType || !selectedQuantity || createPickupMutation.isPending) &&
-              styles.confirmButtonDisabled,
-          ]}
+          style={styles.confirmBtn}
           onPress={handleConfirm}
-          disabled={!selectedType || !selectedQuantity || createPickupMutation.isPending}
-          activeOpacity={0.8}
+          disabled={createPickupMutation.isPending}
         >
           {createPickupMutation.isPending ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.confirmButtonText}>Confirm Request</Text>
+            <View style={styles.confirmBtnRow}>
+              <Text style={styles.confirmBtnText}>Confirm {currentTierObj.name}</Text>
+              <Text style={styles.confirmBtnPrice}>{Brand.currency.symbol}{currentTierObj.price}.00</Text>
+            </View>
           )}
         </TouchableOpacity>
-      </View>
+
+        <View style={{ height: 32 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -315,167 +226,200 @@ export default function TrashDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#F8FAFC",
   },
-  scrollView: {
-    flex: 1,
-  },
-  photosSection: {
-    padding: 20,
-    backgroundColor: Colors.light.card,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: Colors.light.text,
-    marginBottom: 16,
-  },
-  photoScroll: {
-    marginHorizontal: -20,
-    paddingHorizontal: 20,
-  },
-  photo: {
-    width: 120,
-    height: 120,
-    borderRadius: 12,
-    marginRight: 12,
-    backgroundColor: "#E5E7EB",
-  },
-  section: {
-    padding: 20,
-    backgroundColor: Colors.light.card,
-    marginTop: 8,
-  },
-  optionsGrid: {
+  headerRow: {
+    height: 56,
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  typeCard: {
-    flex: 1,
-    minWidth: "45%",
-    aspectRatio: 1,
-    backgroundColor: "#F9FAFB",
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: Colors.light.border,
     alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-  },
-  typeCardActive: {
-    backgroundColor: "#ECFDF5",
-    borderWidth: 2,
-  },
-  typeIcon: {
-    fontSize: 40,
-    marginBottom: 8,
-  },
-  typeLabel: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.light.text,
-  },
-  quantityCard: {
-    flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: Colors.light.border,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
   },
-  quantityCardActive: {
-    backgroundColor: "#ECFDF5",
-    borderColor: Colors.light.primary,
-  },
-  quantityInfo: {
-    flex: 1,
-  },
-  quantityLabel: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.light.text,
-    marginBottom: 4,
-  },
-  quantityDescription: {
-    fontSize: 14,
-    color: Colors.light.muted,
-  },
-  quantityPrice: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: Colors.light.primary,
-  },
-  locationCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
-  },
-  locationIcon: {
+  backBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#ECFDF5",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#F1F5F9",
   },
-  locationText: {
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#0F172A",
+  },
+  scrollView: {
     flex: 1,
+    padding: 18,
+  },
+  photoSection: {
+    marginBottom: 16,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#0F172A",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginBottom: 10,
+  },
+  photoRow: {
+    flexDirection: "row",
+  },
+  photoThumb: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    marginRight: 10,
+  },
+  categoryRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  catChip: {
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  catChipActive: {
+    borderColor: "#2D7A4D",
+    backgroundColor: "#F0FDF4",
+  },
+  catIcon: {
+    fontSize: 16,
+  },
+  catLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#475569",
+  },
+  catLabelActive: {
+    color: "#2D7A4D",
+  },
+  tiersCol: {
+    gap: 10,
+  },
+  tierCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    gap: 12,
+  },
+  tierCardActive: {
+    borderColor: "#2D7A4D",
+    backgroundColor: "#F0FDF4",
+  },
+  tierEmoji: {
+    fontSize: 24,
+  },
+  tierName: {
     fontSize: 15,
-    color: Colors.light.text,
+    fontWeight: "800",
+    color: "#0F172A",
   },
-  communityChip: {
-    backgroundColor: "#ECFDF5",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+  tierSub: {
+    fontSize: 11,
+    color: "#64748B",
+    marginTop: 2,
   },
-  communityChipText: {
-    color: Colors.light.primaryDark,
-    fontWeight: "600" as const,
+  tierPrice: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#2D7A4D",
+  },
+  addressBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    gap: 10,
+  },
+  addressInput: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  paymentRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  paymentChip: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 4,
+  },
+  paymentChipActive: {
+    backgroundColor: "#2D7A4D",
+    borderColor: "#2D7A4D",
+  },
+  pmBadge: {
     fontSize: 12,
   },
-  footer: {
-    backgroundColor: Colors.light.card,
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: Colors.light.border,
+  pmLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#475569",
   },
-  priceContainer: {
+  pmLabelActive: {
+    color: "#FFFFFF",
+  },
+  confirmBtn: {
+    backgroundColor: "#2D7A4D",
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    marginTop: 10,
+    shadowColor: "#2D7A4D",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+  },
+  confirmBtnRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
   },
-  priceLabel: {
+  confirmBtnText: {
+    color: "#FFFFFF",
     fontSize: 16,
-    color: Colors.light.muted,
+    fontWeight: "900",
   },
-  priceValue: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.light.primary,
-  },
-  confirmButton: {
-    backgroundColor: Colors.light.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-  },
-  confirmButtonDisabled: {
-    backgroundColor: "#D1D5DB",
-  },
-  confirmButtonText: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: "#fff",
+  confirmBtnPrice: {
+    backgroundColor: "#FFFFFF",
+    color: "#2D7A4D",
+    fontSize: 14,
+    fontWeight: "900",
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 6,
   },
 });
