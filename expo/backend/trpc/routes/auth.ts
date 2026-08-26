@@ -2,10 +2,14 @@ import * as z from "zod";
 import { eq } from "drizzle-orm";
 
 import { db } from "../../db";
-import { otpCodes, sessions, users } from "../../db/schema";
+import { collectors, otpCodes, sessions, users } from "../../db/schema";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../create-context";
 
-const roleSchema = z.enum(["user", "collector"]);
+const roleSchema = z.enum(["user", "collector", "admin"]);
+// Admin accounts are restricted to an allow-listed phone number. Falls back to the
+// seeded demo admin phone so local/dev environments can reach the admin dashboard.
+const ADMIN_PHONE = process.env.ADMIN_PHONE ?? "+233200000999";
+
 const isOtpDebug = process.env.OTP_DEBUG === "true" || !process.env.OTP_PROVIDER_URL;
 
 function generateOtpCode() {
@@ -75,7 +79,30 @@ export const authRouter = createTRPCRouter({
         throw new Error("Invalid or expired OTP");
       }
 
+      if (input.role === "admin" && input.phone !== ADMIN_PHONE) {
+        throw new Error("This phone number is not authorized for admin access");
+      }
+
       let user = await db.query.users.findFirst({ where: eq(users.phone, input.phone) });
+
+      const ensureCollectorProfile = async (userId: string, name: string) => {
+        const linked = await db.query.collectors.findFirst({
+          where: eq(collectors.userId, userId),
+        });
+        if (!linked) {
+          await db.insert(collectors).values({
+            id: `c_${userId}`,
+            userId,
+            name,
+            photo: "",
+            licenseNumber: "pending-verification",
+            vehicleType: "unassigned",
+            rating: 5,
+            isOnline: false,
+          });
+        }
+      };
+
       if (!user) {
         const userId = `u_${Date.now()}`;
         const createdAt = new Date();
@@ -89,18 +116,12 @@ export const authRouter = createTRPCRouter({
           createdAt,
         });
         if (input.role === "collector") {
-          await db.insert((await import("../../db/schema")).collectors).values({
-            id: `c_${userId}`,
-            userId,
-            name: input.name,
-            photo: "",
-            licenseNumber: "pending-verification",
-            vehicleType: "unassigned",
-            rating: 5,
-            isOnline: false,
-          });
+          await ensureCollectorProfile(userId, input.name);
         }
         user = await db.query.users.findFirst({ where: eq(users.id, userId) });
+      } else if (input.role === "collector") {
+        // Seeded demo accounts exist without a linked collector profile; backfill on sign-in.
+        await ensureCollectorProfile(user.id, user.name);
       }
 
       const token = `token_${Date.now()}`;

@@ -26,12 +26,7 @@ function RootLayoutNav() {
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="camera" options={{ title: "Take Photo", presentation: "modal" }} />
-      <Stack.Screen name="trash-details" options={{ title: "Trash Details" }} />
-      <Stack.Screen name="tracking" options={{ headerShown: false }} />
-      <Stack.Screen name="collector-home" options={{ headerShown: false }} />
-      <Stack.Screen name="collector-profile" options={{ title: "Collector Profile" }} />
-      <Stack.Screen name="wallet" options={{ title: "Earnings" }} />
+      {/* Screens in the (user), (collector) and (admin) groups configure their own headers. */}
       <Stack.Screen name="+not-found" />
     </Stack>
   );

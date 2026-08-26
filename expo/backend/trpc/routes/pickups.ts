@@ -1,5 +1,6 @@
 import * as z from "zod";
 import { eq, and, ne } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../create-context";
 import { db } from "../../db";
 import { pickups, collectors, walletTransactions } from "../../db/schema";
@@ -83,7 +84,9 @@ export const pickupsRouter = createTRPCRouter({
 
       await db.insert(pickups).values(newPickup);
 
-      // Simulate progressive assignment/tracking and movement.
+      // Simulate progressive assignment/tracking and movement. Every stage is
+      // guarded so the simulation never overwrites progress made by a real
+      // collector through acceptRequest/updateStatus/completePickup.
       setTimeout(async () => {
         try {
           const assignedCollector = await db.query.collectors.findFirst({
@@ -91,14 +94,17 @@ export const pickupsRouter = createTRPCRouter({
           });
 
           if (assignedCollector) {
-            await db.update(pickups)
+            const assigned = await db.update(pickups)
               .set({
                 collectorId: assignedCollector.id,
                 status: "assigned",
                 collectorLocation: assignedCollector.location,
                 eta: 5
               })
-              .where(eq(pickups.id, pickupId));
+              .where(and(eq(pickups.id, pickupId), eq(pickups.status, "searching")))
+              .returning({ id: pickups.id });
+
+            if (assigned.length === 0) return; // already accepted manually
 
             setTimeout(async () => {
               await db
@@ -115,7 +121,7 @@ export const pickupsRouter = createTRPCRouter({
                   },
                   eta: 3,
                 })
-                .where(eq(pickups.id, pickupId));
+                .where(and(eq(pickups.id, pickupId), eq(pickups.status, "assigned")));
             }, 2500);
 
             setTimeout(async () => {
@@ -126,7 +132,7 @@ export const pickupsRouter = createTRPCRouter({
                   collectorLocation: input.location,
                   eta: 1,
                 })
-                .where(eq(pickups.id, pickupId));
+                .where(and(eq(pickups.id, pickupId), eq(pickups.status, "on_way")));
             }, 5000);
           }
         } catch (e) {
@@ -169,17 +175,65 @@ export const pickupsRouter = createTRPCRouter({
       return db.query.pickups.findFirst({ where: eq(pickups.id, input.id) });
     }),
 
-  completePickup: publicProcedure
+  acceptRequest: protectedProcedure
+    .input(z.object({ pickupId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const pickup = await db.query.pickups.findFirst({
+        where: eq(pickups.id, input.pickupId),
+      });
+      if (!pickup) throw new TRPCError({ code: "NOT_FOUND", message: "Pickup not found" });
+      if (pickup.status !== "searching") {
+        throw new TRPCError({ code: "CONFLICT", message: "This request was already taken" });
+      }
+
+      const collector = await db.query.collectors.findFirst({
+        where: eq(collectors.userId, ctx.user.id),
+      });
+      if (!collector) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "No collector profile is linked to this account",
+        });
+      }
+
+      await db
+        .update(pickups)
+        .set({
+          collectorId: collector.id,
+          status: "assigned",
+          ...(collector.location ? { collectorLocation: collector.location } : {}),
+          eta: 5,
+        })
+        .where(eq(pickups.id, input.pickupId));
+
+      return db.query.pickups.findFirst({ where: eq(pickups.id, input.pickupId) });
+    }),
+
+  completePickup: protectedProcedure
     .input(
       z.object({
         id: z.string(),
-        collectorId: z.string(),
         afterPhoto: z.string().url(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      // Derive identity from the session so earnings are recorded for the
+      // signed-in collector (c_<userId>), matching the wallet routes.
+      const collector = await db.query.collectors.findFirst({
+        where: eq(collectors.userId, ctx.user.id),
+      });
+      if (!collector) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "No collector profile is linked to this account",
+        });
+      }
+
       const pickup = await db.query.pickups.findFirst({ where: eq(pickups.id, input.id) });
-      if (!pickup) throw new Error("Pickup not found");
+      if (!pickup) throw new TRPCError({ code: "NOT_FOUND", message: "Pickup not found" });
+      if (pickup.collectorId && pickup.collectorId !== collector.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Not your assignment" });
+      }
 
       await db
         .update(pickups)
@@ -192,7 +246,7 @@ export const pickupsRouter = createTRPCRouter({
 
       await db.insert(walletTransactions).values({
         id: `wt_${Date.now()}`,
-        collectorId: input.collectorId,
+        collectorId: collector.id,
         pickupId: input.id,
         amount: pickup.price,
         type: "earning",

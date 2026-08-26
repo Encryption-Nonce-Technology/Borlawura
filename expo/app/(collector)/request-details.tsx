@@ -1,24 +1,31 @@
 import { useLocalSearchParams, router } from "expo-router";
-import { Camera, CheckCircle } from "lucide-react-native";
-import { Alert, Image, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { Check, MapPin } from "lucide-react-native";
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import Colors from "@/constants/colors";
+import Colors, { Brand } from "@/constants/colors";
+import { useSession } from "@/lib/session";
 import { trpc } from "@/lib/trpc";
 
 export default function RequestDetailsScreen() {
   const params = useLocalSearchParams();
   const requestId = params.requestId as string;
-  const requestQuery = trpc.pickups.getById.useQuery({ id: requestId });
-  const completeMutation = trpc.pickups.completePickup.useMutation({
+  const { session } = useSession();
+
+  const requestQuery = trpc.pickups.getById.useQuery(
+    { id: requestId },
+    { refetchInterval: 3000 },
+  );
+  const acceptMutation = trpc.pickups.acceptRequest.useMutation({
     onSuccess: () => {
-      Alert.alert("Done", "Pickup completed and earnings recorded.");
-      router.back();
+      Alert.alert("Request accepted", "Head over to your live job to get started.");
+      router.replace("/(collector)/active-pickup" as any);
     },
+    onError: (error) => Alert.alert("Could not accept request", error.message),
   });
-  const rateMutation = trpc.ratings.leaveReview.useMutation();
 
   const request = requestQuery.data;
+
   if (!request) {
     return (
       <SafeAreaView style={styles.container}>
@@ -29,46 +36,45 @@ export default function RequestDetailsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
-      <Text style={styles.title}>Request #{request.id}</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Request #{request.id}</Text>
+        <Text style={[styles.statusPill, request.status === "searching" && styles.statusPillOpen]}>
+          {request.status.replace("_", " ").toUpperCase()}
+        </Text>
+      </View>
       <Text style={styles.meta}>
-        {request.trashType} • {request.quantity} • ₵{request.price}
+        {request.trashType} • {request.quantity} • {Brand.currency.symbol}
+        {request.price}
       </Text>
-      <Text style={styles.address}>{request.address}</Text>
+      <View style={styles.addressRow}>
+        <MapPin size={16} color="#6B7280" />
+        <Text style={styles.address}>{request.address}</Text>
+      </View>
 
       {request.photos[0] && <Image source={{ uri: request.photos[0] }} style={styles.preview} />}
 
-      <TouchableOpacity
-        style={styles.cta}
-        onPress={() =>
-          completeMutation.mutate({
-            id: request.id,
-            collectorId: "c1",
-            afterPhoto:
-              "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=700&q=60",
-          })
-        }
-      >
-        <Camera size={18} color="#fff" />
-        <Text style={styles.ctaText}>
-          {completeMutation.isPending ? "Saving proof..." : "Upload after-photo & complete"}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.cta, { backgroundColor: "#2563EB" }]}
-        onPress={() =>
-          rateMutation.mutate({
-            pickupId: request.id,
-            fromUserId: "u2",
-            toUserId: "u1",
-            rating: 5,
-            comment: "User was cooperative and ready on time",
-          })
-        }
-      >
-        <CheckCircle size={18} color="#fff" />
-        <Text style={styles.ctaText}>{rateMutation.isPending ? "Saving..." : "Rate user (5★)"}</Text>
-      </TouchableOpacity>
+      {request.status === "searching" ? (
+        <TouchableOpacity
+          style={styles.cta}
+          testID="accept-request-button"
+          onPress={() => acceptMutation.mutate({ pickupId: request.id })}
+          activeOpacity={0.8}
+        >
+          <Check size={18} color="#fff" />
+          <Text style={styles.ctaText}>
+            {acceptMutation.isPending ? "Accepting..." : "Accept this request"}
+          </Text>
+        </TouchableOpacity>
+      ) : request.status === "collected" ? (
+        <Text style={styles.secondaryText}>This pickup is already completed.</Text>
+      ) : (
+        <TouchableOpacity
+          style={[styles.cta, styles.ctaSecondary]}
+          onPress={() => router.push("/(collector)/active-pickup" as any)}
+        >
+          <Text style={styles.ctaText}>Open live job</Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 }
@@ -90,7 +96,8 @@ const styles = StyleSheet.create({
     fontWeight: "600" as const,
   },
   address: {
-    marginTop: 8,
+    flex: 1,
+    marginTop: 0,
     color: Colors.light.muted,
   },
   preview: {
@@ -113,6 +120,40 @@ const styles = StyleSheet.create({
   ctaText: {
     color: "#fff",
     fontWeight: "700" as const,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  statusPill: {
+    fontSize: 11,
+    fontWeight: "700" as const,
+    color: "#065F46",
+    backgroundColor: "#D1FAE5",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    textTransform: "uppercase",
+    overflow: "hidden",
+  },
+  statusPillOpen: {
+    color: "#92400E",
+    backgroundColor: "#FEF3C7",
+  },
+  addressRow: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  secondaryText: {
+    marginTop: 16,
+    color: Colors.light.muted,
+  },
+  ctaSecondary: {
+    backgroundColor: "#2563EB",
   },
 });
 

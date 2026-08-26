@@ -8,6 +8,7 @@
     "start-web-dev": "DEBUG=expo* npx rork start -p boi5ou8x4jjj9rp7w61tm --web --tunnel",
     "lint": "expo lint",
     "start-backend": "tsx backend/index.ts",
+    "smoke": "tsx backend/smoke.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "android": "expo run:android",

@@ -15,7 +15,10 @@ export default function RoleSelectorScreen() {
   const handleContinue = () => {
     if (!selectedRole) return;
 
-    router.replace("/(auth)/login" as any);
+    router.push({
+      pathname: "/(auth)/login",
+      params: { role: selectedRole },
+    } as any);
   };
 
   return (

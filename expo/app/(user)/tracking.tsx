@@ -13,7 +13,8 @@ import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors, { Brand } from "@/constants/colors";
-import { trpc } from "@/lib/trpc";
+import { useSession } from "@/lib/session";
+import { trpc } from "@/lib/trpc"; 
 
 type PickupStatus = "searching" | "assigned" | "on_way" | "arrived" | "collected";
 
@@ -32,6 +33,7 @@ export default function TrackingScreen() {
   const params = useLocalSearchParams();
   const pickupId = params.pickupId as string;
   const [pollingInterval, setPollingInterval] = useState<number>(2000);
+  const { session } = useSession();
 
   const pickupQuery = trpc.pickups.getById.useQuery(
     { id: pickupId },
@@ -190,8 +192,10 @@ export default function TrackingScreen() {
               onPress={() =>
                 ratingMutation.mutate({
                   pickupId: pickup.id,
-                  fromUserId: "u1",
-                  toUserId: pickup.collectorId || "u2",
+                  fromUserId: session?.user.id ?? "",
+                  // Rate the user account behind the collector profile,
+                  // falling back to the collector id for seeded rows.
+                  toUserId: collector?.userId || pickup.collectorId || "",
                   rating: 5,
                   comment: "Great service",
                 })

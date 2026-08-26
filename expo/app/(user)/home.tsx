@@ -7,10 +7,33 @@ import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors, { Brand } from "@/constants/colors";
+import { clearSession } from "@/lib/session";
+import { trpc } from "@/lib/trpc";
 
 export default function UserHomeScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [hasPermission, setHasPermission] = useState<boolean>(false);
+
+  const logoutMutation = trpc.auth.logout.useMutation();
+
+  const handleSignOut = () => {
+    Alert.alert("Sign out", "Log out of Borlawura?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Sign out",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await logoutMutation.mutateAsync();
+          } catch {
+            // Always clear the local session, even if the backend is unreachable.
+          }
+          await clearSession();
+          router.replace("/(auth)/login" as any);
+        },
+      },
+    ]);
+  };
 
   useEffect(() => {
     (async () => {
@@ -115,7 +138,7 @@ export default function UserHomeScreen() {
           </View>
           <TouchableOpacity
             style={styles.profileButton}
-            onPress={() => router.push("/" as any)}
+            onPress={handleSignOut}
             testID="profile-button"
           >
             <User size={24} color={Colors.light.primary} />

@@ -1,5 +1,13 @@
 import { router } from "expo-router";
-import { Power, PowerOff, Wallet, Image as ImageIcon, MapPin, Route } from "lucide-react-native";
+import {
+  Power,
+  PowerOff,
+  Wallet,
+  Image as ImageIcon,
+  MapPin,
+  Route,
+  LogOut,
+} from "lucide-react-native";
 import { useState } from "react";
 import {
   View,
@@ -13,16 +21,36 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors, { Brand } from "@/constants/colors";
+import { clearSession, useSession } from "@/lib/session";
 import { trpc } from "@/lib/trpc";
 
 export default function CollectorHomeScreen() {
   const [isOnline, setIsOnline] = useState<boolean>(true);
+  const { session } = useSession();
+
+  // Collectors registered via OTP signup have a collectors row keyed c_<userId>.
+  const myCollectorId = session ? `c_${session.user.id}` : "";
+  const myJobsQuery = trpc.pickups.getCollectorPickups.useQuery(
+    { collectorId: myCollectorId },
+    { enabled: !!myCollectorId, refetchInterval: isOnline ? 5000 : 0 },
+  );
+  const logoutMutation = trpc.auth.logout.useMutation();
+
+  const handleSignOut = async () => {
+    try {
+      await logoutMutation.mutateAsync();
+    } catch {
+      // Clear the local session even if the backend is unreachable.
+    }
+    await clearSession();
+    router.replace("/(auth)/login" as any);
+  };
 
   const requestsQuery = trpc.pickups.getActiveRequests.useQuery(undefined, {
     refetchInterval: isOnline ? 3000 : 0,
   });
   const optimizedQuery = trpc.routing.optimizeForCollector.useQuery(
-    { collectorId: "c1" },
+    { collectorId: myCollectorId },
     { enabled: isOnline, refetchInterval: isOnline ? 5000 : 0 },
   );
 
@@ -51,13 +79,22 @@ export default function CollectorHomeScreen() {
           </View>
           <Text style={styles.subtitle}>Collector</Text>
         </View>
-        <TouchableOpacity
-          style={styles.walletButton}
-          onPress={() => router.push("/(collector)/wallet" as any)}
-          testID="wallet-button"
-        >
-          <Wallet size={24} color="#10B981" />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            style={styles.walletButton}
+            onPress={() => router.push("/(collector)/wallet" as any)}
+            testID="wallet-button"
+          >
+            <Wallet size={24} color="#10B981" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.walletButton}
+            onPress={handleSignOut}
+            testID="logout-button"
+          >
+            <LogOut size={24} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.statusCard}>
@@ -81,6 +118,17 @@ export default function CollectorHomeScreen() {
       </View>
 
       <View style={styles.content}>
+        {myJobsQuery.data && myJobsQuery.data.length > 0 && (
+          <TouchableOpacity
+            testID="active-job-banner"
+            style={styles.activeJobBanner}
+            onPress={() => router.push("/(collector)/active-pickup" as any)}
+            activeOpacity={0.8}
+          >
+            <Route size={16} color="#fff" />
+            <Text style={styles.activeJobBannerText}>Active job — tap to continue</Text>
+          </TouchableOpacity>
+        )}
         {optimizedQuery.data && optimizedQuery.data.length > 0 && (
           <View style={styles.routeHint}>
             <Route size={16} color={Colors.light.primary} />
@@ -286,6 +334,24 @@ const styles = StyleSheet.create({
   },
   toggleButtonOff: {
     backgroundColor: "#E5E7EB",
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  activeJobBanner: {
+    backgroundColor: Colors.light.primaryDark,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  activeJobBannerText: {
+    color: "#fff",
+    fontWeight: "700" as const,
   },
   content: {
     flex: 1,
