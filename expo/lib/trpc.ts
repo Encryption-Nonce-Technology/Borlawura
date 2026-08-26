@@ -5,6 +5,7 @@ import { Platform } from "react-native";
 import superjson from "superjson";
 
 import type { AppRouter } from "@/backend/trpc/app-router";
+import { getActiveToken } from "@/lib/session";
 
 export const trpc = createTRPCReact<AppRouter>();
 
@@ -35,6 +36,10 @@ export const trpcClient = trpc.createClient({
     httpLink({
       url: `${getBaseUrl()}/trpc`,
       transformer: superjson,
+      headers: () => {
+        const token = getActiveToken();
+        return token ? { Authorization: `Bearer ${token}` } : {};
+      },
     }),
   ],
 });

@@ -3,17 +3,16 @@ import { desc, eq } from "drizzle-orm";
 
 import { db } from "../../db";
 import { walletTransactions, withdrawals } from "../../db/schema";
-import { createTRPCRouter, publicProcedure } from "../create-context";
+import { adminProcedure, createTRPCRouter, protectedProcedure } from "../create-context";
 
 const withdrawMethod = z.enum(["mtn_momo", "vodafone_cash", "airteltigo_cash"]);
 
 export const walletRouter = createTRPCRouter({
-  summary: publicProcedure
-    .input(z.object({ collectorId: z.string() }))
-    .query(async ({ input }) => {
+  summary: protectedProcedure.query(async ({ ctx }) => {
+      const collectorId = `c_${ctx.user.id}`;
       const row = await db
         .query.walletTransactions.findMany({
-          where: eq(walletTransactions.collectorId, input.collectorId),
+          where: eq(walletTransactions.collectorId, collectorId),
         });
 
       return {
@@ -26,28 +25,27 @@ export const walletRouter = createTRPCRouter({
       };
     }),
 
-  history: publicProcedure
-    .input(z.object({ collectorId: z.string() }))
-    .query(async ({ input }) => {
+  history: protectedProcedure.query(async ({ ctx }) => {
+      const collectorId = `c_${ctx.user.id}`;
       return db.query.walletTransactions.findMany({
-        where: eq(walletTransactions.collectorId, input.collectorId),
+        where: eq(walletTransactions.collectorId, collectorId),
         orderBy: [desc(walletTransactions.createdAt)],
       });
     }),
 
-  requestWithdrawal: publicProcedure
+  requestWithdrawal: protectedProcedure
     .input(
       z.object({
-        collectorId: z.string(),
         amount: z.number().positive(),
         method: withdrawMethod,
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const collectorId = `c_${ctx.user.id}`;
       const id = `wd_${Date.now()}`;
       await db.insert(withdrawals).values({
         id,
-        collectorId: input.collectorId,
+        collectorId,
         amount: input.amount,
         method: input.method,
         status: "requested",
@@ -55,7 +53,7 @@ export const walletRouter = createTRPCRouter({
       });
       await db.insert(walletTransactions).values({
         id: `wt_${Date.now()}`,
-        collectorId: input.collectorId,
+        collectorId,
         pickupId: null,
         withdrawalId: id,
         amount: input.amount,
@@ -66,19 +64,11 @@ export const walletRouter = createTRPCRouter({
       return { success: true, withdrawalId: id };
     }),
 
-  listWithdrawals: publicProcedure
-    .input(z.object({ collectorId: z.string().optional() }).optional())
-    .query(async ({ input }) => {
-      if (input?.collectorId) {
-        return db.query.withdrawals.findMany({
-          where: eq(withdrawals.collectorId, input.collectorId),
-          orderBy: [desc(withdrawals.createdAt)],
-        });
-      }
+  listWithdrawals: adminProcedure.query(async () => {
       return db.query.withdrawals.findMany({ orderBy: [desc(withdrawals.createdAt)] });
     }),
 
-  setWithdrawalStatus: publicProcedure
+  setWithdrawalStatus: adminProcedure
     .input(
       z.object({
         withdrawalId: z.string(),

@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { eq, and, ne } from "drizzle-orm";
-import { createTRPCRouter, publicProcedure } from "../create-context";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../create-context";
 import { db } from "../../db";
 import { pickups, collectors, walletTransactions } from "../../db/schema";
 
@@ -24,10 +24,9 @@ function haversineKm(
 }
 
 export const pickupsRouter = createTRPCRouter({
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
-        userId: z.string(),
         photos: z.array(z.string()).min(1).max(3),
         trashType: z.enum(["plastic", "organic", "mixed", "ewaste"]),
         quantity: z.enum(["small", "sack", "bin"]),
@@ -42,7 +41,7 @@ export const pickupsRouter = createTRPCRouter({
         paymentMethod: paymentMethodSchema.optional(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const priceMap = {
         small: 50,
         sack: 150,
@@ -73,6 +72,7 @@ export const pickupsRouter = createTRPCRouter({
       const newPickup = {
         id: pickupId,
         ...input,
+        userId: ctx.user.id,
         distanceKm,
         price: totalPrice,
         paymentStatus: "pending",

@@ -102,7 +102,6 @@ export default function TrashDetailsScreen() {
 
     try {
       const pickup = await createPickupMutation.mutateAsync({
-        userId: "user1",
         photos,
         trashType: selectedType,
         quantity: selectedQuantity,
@@ -128,7 +127,6 @@ export default function TrashDetailsScreen() {
       await AsyncStorage.setItem(
         queuedKey,
         JSON.stringify({
-          userId: "user1",
           photos,
           trashType: selectedType,
           quantity: selectedQuantity,

@@ -3,9 +3,9 @@ import { eq } from "drizzle-orm";
 
 import { db } from "../../db";
 import { otpCodes, sessions, users } from "../../db/schema";
-import { createTRPCRouter, publicProcedure } from "../create-context";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../create-context";
 
-const roleSchema = z.enum(["user", "collector", "admin"]);
+const roleSchema = z.enum(["user", "collector"]);
 const isOtpDebug = process.env.OTP_DEBUG === "true" || !process.env.OTP_PROVIDER_URL;
 
 function generateOtpCode() {
@@ -88,6 +88,18 @@ export const authRouter = createTRPCRouter({
           isActive: true,
           createdAt,
         });
+        if (input.role === "collector") {
+          await db.insert((await import("../../db/schema")).collectors).values({
+            id: `c_${userId}`,
+            userId,
+            name: input.name,
+            photo: "",
+            licenseNumber: "pending-verification",
+            vehicleType: "unassigned",
+            rating: 5,
+            isOnline: false,
+          });
+        }
         user = await db.query.users.findFirst({ where: eq(users.id, userId) });
       }
 
@@ -111,5 +123,10 @@ export const authRouter = createTRPCRouter({
       if (!session) return null;
       return db.query.users.findFirst({ where: eq(users.id, session.userId) });
     }),
+
+  logout: protectedProcedure.mutation(async ({ ctx }) => {
+    await db.delete(sessions).where(eq(sessions.userId, ctx.user.id));
+    return { success: true };
+  }),
 });
 

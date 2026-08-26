@@ -109,9 +109,18 @@ Main tRPC router:
 
 ## Current status
 
-- Core request and collector flows are implemented
-- Collector assignment is currently simulated in-process
-- Wallet data is currently mock/placeholder
+- Phone + OTP sign-in is available in the Expo app. Without an SMS provider configured, the generated code is returned only for local development.
+- User and collector sessions are persisted on-device and attached to tRPC requests as bearer tokens.
+- New pickup requests are tied to the authenticated user rather than a client-supplied ID.
+- Collector signup provisions a collector profile; wallet balances and transaction history are database-backed.
+- Admin screens are bundled in `expo/app/(admin)`. Admin accounts must be provisioned by an operator; public sign-up cannot create an admin account.
+- Collector assignment and location progression are still simulated in-process, and payment providers remain a state-only integration (not a live charge).
+
+## Security notes
+
+- The admin router and withdrawal approval endpoints require an authenticated admin session.
+- Wallet queries and withdrawal requests use the authenticated collector identity.
+- Before production, replace timestamp-based tokens/IDs with cryptographically secure values, add token expiry and revocation, and connect a verified OTP provider.
 
 ## Feature status (requested upgrades)
 

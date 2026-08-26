@@ -2,6 +2,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 
 const SESSION_KEY = "borlawura.session";
+let activeToken: string | null = null;
+
+export function getActiveToken() {
+  return activeToken;
+}
 
 export type SessionUser = {
   id: string;
@@ -19,13 +24,16 @@ export async function getSession(): Promise<SessionState | null> {
   const raw = await AsyncStorage.getItem(SESSION_KEY);
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as SessionState;
+    const session = JSON.parse(raw) as SessionState;
+    activeToken = session.token;
+    return session;
   } catch {
     return null;
   }
 }
 
 export async function saveSession(session: SessionState) {
+  activeToken = session.token;
   await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
 }
 
@@ -50,6 +58,7 @@ export async function saveGuestSession(role: SessionUser["role"]) {
 }
 
 export async function clearSession() {
+  activeToken = null;
   await AsyncStorage.removeItem(SESSION_KEY);
 }
 

@@ -5,7 +5,6 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from "rea
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors, { Brand } from "@/constants/colors";
-import { saveGuestSession } from "@/lib/session";
 
 const { width } = Dimensions.get("window");
 
@@ -13,24 +12,10 @@ export default function RoleSelectorScreen() {
   const [selectedRole, setSelectedRole] = useState<"user" | "collector" | "admin" | null>(null);
 
   const currencySymbol = useMemo(() => Brand.currency.symbol, []);
-  const [isEntering, setIsEntering] = useState(false);
+  const handleContinue = () => {
+    if (!selectedRole) return;
 
-  const handleContinue = async () => {
-    if (!selectedRole || isEntering) return;
-
-    setIsEntering(true);
-    try {
-      await saveGuestSession(selectedRole);
-      if (selectedRole === "user") {
-        router.replace("/(user)/home" as any);
-      } else if (selectedRole === "collector") {
-        router.replace("/(collector)/home" as any);
-      } else if (selectedRole === "admin") {
-        router.replace("/(admin)/dashboard" as any);
-      }
-    } finally {
-      setIsEntering(false);
-    }
+    router.replace("/(auth)/login" as any);
   };
 
   return (
@@ -114,7 +99,7 @@ export default function RoleSelectorScreen() {
           disabled={!selectedRole}
           activeOpacity={0.8}
         >
-          <Text style={styles.buttonText}>{isEntering ? "Entering..." : "Continue as guest"}</Text>
+          <Text style={styles.buttonText}>Continue to secure sign in</Text>
         </TouchableOpacity>
       </SafeAreaView>
     </View>

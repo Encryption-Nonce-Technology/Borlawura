@@ -54,12 +54,17 @@ export default function RootLayout() {
     const inUserGroup = rootSegment === "(user)";
     const inCollectorGroup = rootSegment === "(collector)";
 
-    if (!session && rootSegment !== undefined) {
-      router.replace("/" as any);
+    if (!session && rootSegment !== "(auth)") {
+      router.replace("/(auth)/login" as any);
       return;
     }
 
     if (!session) return;
+
+    if (rootSegment === "(auth)") {
+      router.replace("/" as any);
+      return;
+    }
 
     if (inAdminGroup && session.user.role !== "admin") {
       router.replace("/" as any);

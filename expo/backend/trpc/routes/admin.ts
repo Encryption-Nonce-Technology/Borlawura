@@ -2,10 +2,10 @@ import { desc, eq, sql } from "drizzle-orm";
 
 import { db } from "../../db";
 import { pickups, users } from "../../db/schema";
-import { createTRPCRouter, publicProcedure } from "../create-context";
+import { adminProcedure, createTRPCRouter } from "../create-context";
 
 export const adminRouter = createTRPCRouter({
-  analytics: publicProcedure.query(async () => {
+  analytics: adminProcedure.query(async () => {
     const totalPickupsRow = await db.select({ count: sql<number>`count(*)` }).from(pickups);
     const activeUsersRow = await db
       .select({ count: sql<number>`count(*)` })
@@ -23,18 +23,18 @@ export const adminRouter = createTRPCRouter({
     };
   }),
 
-  listUsers: publicProcedure.query(async () => {
+  listUsers: adminProcedure.query(async () => {
     return db.query.users.findMany({ orderBy: [desc(users.createdAt)] });
   }),
 
-  listCollectors: publicProcedure.query(async () => {
+  listCollectors: adminProcedure.query(async () => {
     return db.query.users.findMany({
       where: eq(users.role, "collector"),
       orderBy: [desc(users.createdAt)],
     });
   }),
 
-  listRequests: publicProcedure.query(async () => {
+  listRequests: adminProcedure.query(async () => {
     return db.query.pickups.findMany({ orderBy: [desc(pickups.createdAt)] });
   }),
 });

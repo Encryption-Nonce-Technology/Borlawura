@@ -6,9 +6,8 @@ import Colors, { Brand } from "@/constants/colors";
 import { trpc } from "@/lib/trpc";
 
 export default function WalletScreen() {
-  const collectorId = "c1";
-  const summaryQuery = trpc.wallet.summary.useQuery({ collectorId });
-  const historyQuery = trpc.wallet.history.useQuery({ collectorId });
+  const summaryQuery = trpc.wallet.summary.useQuery();
+  const historyQuery = trpc.wallet.history.useQuery();
   const withdrawMutation = trpc.wallet.requestWithdrawal.useMutation({
     onSuccess: async () => {
       await summaryQuery.refetch();
@@ -48,7 +47,6 @@ export default function WalletScreen() {
             style={styles.withdrawButton}
             onPress={() =>
               withdrawMutation.mutate({
-                collectorId,
                 amount: Math.max(50, Math.floor(totalEarnings * 0.3)),
                 method: "mtn_momo",
               })
