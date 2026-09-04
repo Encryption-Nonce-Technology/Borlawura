@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack, useRouter, useSegments, useRootNavigationState } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -31,6 +31,7 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const { session, loading } = useSession();
+  const rootNavigationState = useRootNavigationState();
   const isReplaying = useRef(false);
 
   useEffect(() => {
@@ -38,42 +39,47 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (loading) return;
-    const rootSegment = segments[0];
-    const inAdminGroup = rootSegment === "(admin)";
-    const inUserGroup = rootSegment === "(user)";
-    const inCollectorGroup = rootSegment === "(collector)";
+    if (loading || !rootNavigationState?.key) return;
 
-    if (!session && rootSegment !== "(auth)") {
-      router.replace("/(auth)/login" as any);
-      return;
-    }
+    const timeoutId = setTimeout(() => {
+      const rootSegment = segments[0];
+      const inAdminGroup = rootSegment === "(admin)";
+      const inUserGroup = rootSegment === "(user)";
+      const inCollectorGroup = rootSegment === "(collector)";
 
-    if (!session) return;
-
-    if (rootSegment === "(auth)" || !rootSegment) {
-      if (session.user.role === "collector") {
-        router.replace("/(collector)/home" as any);
-      } else if (session.user.role === "admin") {
-        router.replace("/(admin)/dashboard" as any);
-      } else {
-        router.replace("/(user)/home" as any);
+      if (!session && rootSegment !== "(auth)") {
+        router.replace("/(auth)/login" as any);
+        return;
       }
-      return;
-    }
 
-    if (inAdminGroup && session.user.role !== "admin") {
-      router.replace("/(user)/home" as any);
-      return;
-    }
-    if (inCollectorGroup && !["collector", "admin"].includes(session.user.role)) {
-      router.replace("/(user)/home" as any);
-      return;
-    }
-    if (inUserGroup && !["user", "admin"].includes(session.user.role)) {
-      router.replace("/(collector)/home" as any);
-    }
-  }, [loading, router, segments, session]);
+      if (!session) return;
+
+      if (rootSegment === "(auth)" || !rootSegment) {
+        if (session.user.role === "collector") {
+          router.replace("/(collector)/home" as any);
+        } else if (session.user.role === "admin") {
+          router.replace("/(admin)/dashboard" as any);
+        } else {
+          router.replace("/(user)/home" as any);
+        }
+        return;
+      }
+
+      if (inAdminGroup && session.user.role !== "admin") {
+        router.replace("/(user)/home" as any);
+        return;
+      }
+      if (inCollectorGroup && !["collector", "admin"].includes(session.user.role)) {
+        router.replace("/(user)/home" as any);
+        return;
+      }
+      if (inUserGroup && !["user", "admin"].includes(session.user.role)) {
+        router.replace("/(collector)/home" as any);
+      }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, [loading, router, segments, session, rootNavigationState?.key]);
 
   useEffect(() => {
     if (loading || !session || isReplaying.current) return;

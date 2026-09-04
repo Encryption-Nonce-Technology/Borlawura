@@ -10,7 +10,7 @@ import {
   TextInput,
   Platform,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useRootNavigationState } from "expo-router";
 import {
   Truck,
   Package,
@@ -47,20 +47,25 @@ export default function BorlaPlusInspiredHomepage() {
   const [address, setAddress] = useState<string>("East Legon, Accra");
   const [selectedTier, setSelectedTier] = useState<string>("small");
   const { session } = useSession();
+  const rootNavigationState = useRootNavigationState();
 
   // On mobile native apps, skip the website landing page
   useEffect(() => {
+    if (!rootNavigationState?.key) return;
     if (IS_NATIVE) {
-      if (session?.user) {
-        const role = session.user.role;
-        if (role === "collector") router.replace("/(collector)/home" as any);
-        else if (role === "admin") router.replace("/(admin)/dashboard" as any);
-        else router.replace("/(user)/home" as any);
-      } else {
-        router.replace("/(auth)/login" as any);
-      }
+      const timeoutId = setTimeout(() => {
+        if (session?.user) {
+          const role = session.user.role;
+          if (role === "collector") router.replace("/(collector)/home" as any);
+          else if (role === "admin") router.replace("/(admin)/dashboard" as any);
+          else router.replace("/(user)/home" as any);
+        } else {
+          router.replace("/(auth)/login" as any);
+        }
+      }, 0);
+      return () => clearTimeout(timeoutId);
     }
-  }, [session]);
+  }, [session, rootNavigationState?.key]);
 
   const handleLaunchApp = (role: "user" | "collector" | "admin" = "user") => {
     if (session && session.user.role === role) {
