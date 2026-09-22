@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Borlawura — Interactive Platform Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #059669;
+      --primary-dark: #064e3b;
+      --primary-light: #d1fae5;
+      --gold: #d97706;
+      --gold-light: #fef3c7;
+      --bg-dark: #0f172a;
+      --bg-card-dark: #1e293b;
+      --bg-light: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --card-bg: #ffffff;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+    }
+
+    h1, h2, h3, h4, .brand-font {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* Deck Layout */
+    .deck-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-dark);
+    }
+
+    /* Top Global Navigation Bar */
+    header.deck-header {
+      height: 60px;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 50;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .brand-tagline {
+      font-size: 0.8rem;
+      color: var(--gold);
+      font-weight: 600;
+      background: rgba(217, 119, 6, 0.15);
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .nav-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 0 12px rgba(5, 150, 105, 0.4);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .action-btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .action-btn-primary:hover {
+      background: #047857;
+    }
+
+    .action-btn-outline {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .action-btn-outline:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Slides Stage */
+    .slides-stage {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg-light);
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 36px 48px 48px;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(40px);
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .slide.dark-theme {
+      background: var(--bg-dark);
+      color: #fff;
+    }
+
+    .slide-header {
+      margin-bottom: 24px;
+    }
+
+    .slide-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .dark-theme .slide-badge {
+      color: var(--gold);
+    }
+
+    .slide-title {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .dark-theme .slide-title {
+      color: #fff;
+    }
+
+    .slide-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .dark-theme .slide-subtitle {
+      color: #94a3b8;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      flex: 1;
+      align-items: stretch;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      flex: 1;
+    }
+
+    /* Cards */
+    .deck-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s ease;
+    }
+
+    .deck-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .dark-theme .deck-card {
+      background: var(--bg-card-dark);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .card-highlight {
+      border-left: 5px solid var(--primary);
+    }
+
+    .card-gold {
+      border-left: 5px solid var(--gold);
+    }
+
+    /* Media Image Card */
+    .media-card {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      background: #000;
+    }
+
+    .media-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .media-card:hover img {
+      transform: scale(1.03);
+    }
+
+    .media-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.4) 70%, transparent);
+      padding: 20px;
+      color: #fff;
+    }
+
+    .media-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+
+    .media-desc {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+    }
+
+    /* Interactive Calculator Widget on Slide 6 */
+    .calc-box {
+      background: #ffffff;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .calc-row {
+      margin-bottom: 16px;
+    }
+
+    .calc-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .calc-val-highlight {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .toggle-chip {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-light);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .toggle-chip.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .range-slider {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .price-display-card {
+      background: linear-gradient(135deg, var(--primary-dark), #0f766e);
+      border-radius: 16px;
+      padding: 20px;
+      color: #fff;
+      margin-top: 18px;
+      text-align: center;
+    }
+
+    .price-total {
+      font-size: 2.8rem;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+      color: #34d399;
+      line-height: 1;
+      margin: 8px 0;
+    }
+
+    .price-breakdown-list {
+      font-size: 0.8rem;
+      color: #a7f3d0;
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      padding-top: 10px;
+    }
+
+    /* Interactive Timeline Simulator on Slide 3 */
+    .timeline-tabs {
+      display: flex;
+      border-radius: 12px;
+      background: #f1f5f9;
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    .t-tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .t-tab.active {
+      background: #fff;
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    .stage-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+
+    /* Bottom Deck Controls */
+    footer.deck-footer {
+      height: 52px;
+      background: rgba(15, 23, 42, 0.95);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 50;
+      color: #94a3b8;
+      font-size: 0.85rem;
+    }
+
+    .footer-arrows {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-arrow-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #fff;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .nav-arrow-btn:hover {
+      background: var(--primary);
+    }
+
+    .slide-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .slide-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .slide-dot.active {
+      width: 24px;
+      background: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck-container">
+    <!-- Top Global Interactive Header -->
+    <header class="deck-header">
+      <div class="brand-group">
+        <img src="public/icon-512.png" alt="Borlawura" class="brand-logo" onerror="this.style.display='none'">
+        <div>
+          <span class="brand-title">Borlawura</span>
+          <span class="brand-tagline">“Snap it. Request it. It’s gone.”</span>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" id="navTabs">
+        <button class="nav-tab active" onclick="goToSlide(0)">Overview</button>
+        <button class="nav-tab" onclick="goToSlide(1)">The Problem</button>
+        <button class="nav-tab" onclick="goToSlide(2)">Customer App</button>
+        <button class="nav-tab" onclick="goToSlide(3)">Collector App</button>
+        <button class="nav-tab" onclick="goToSlide(4)">Admin CMS</button>
+        <button class="nav-tab" onclick="goToSlide(5)">Interactive Pricing</button>
+        <button class="nav-tab" onclick="goToSlide(6)">ESG Impact</button>
+        <button class="nav-tab" onclick="goToSlide(7)">Roadmap</button>
+      </nav>
+
+      <div class="header-actions">
+        <a href="https://encryption-nonce-technology.github.io/Borlawura/" target="_blank" class="action-btn action-btn-primary">
+          Try Live App ↗
+        </a>
+        <button class="action-btn action-btn-outline" onclick="toggleFullScreen()">
+          ⛶ Fullscreen
+        </button>
+      </div>
+    </header>
+
+    <!-- Slides Stage -->
+    <main class="slides-stage">
+
+      <!-- SLIDE 0: Hero & Overview -->
+      <section class="slide dark-theme active" id="slide-0">
+        <div class="grid-2" style="align-items: center;">
+          <div>
+            <span class="slide-badge">GHANA'S REVERSE-LOGISTICS PLATFORM</span>
+            <h1 class="slide-title" style="font-size: 3rem; margin-top: 8px;">Borlawura Waste Connect</h1>
+            <p class="slide-subtitle" style="font-size: 1.35rem; color: #34d399; font-style: italic; margin-top: 6px;">
+              “Snap it. Request it. It’s gone.”
+            </p>
+            <p style="margin-top: 20px; font-size: 1.05rem; line-height: 1.6; color: #cbd5e1; max-width: 580px;">
+              A ride-hailing style two-sided marketplace connecting households, retail shops, and corporate offices with verified local waste collectors. 
+              Features transparent algorithmic Cedi pricing, live GPS tracking, Mobile Money checkout, and verified photo proof.
+            </p>
+            
+            <div style="display: flex; gap: 14px; margin-top: 32px;">
+              <button class="action-btn action-btn-primary" style="padding: 12px 24px; font-size: 1rem;" onclick="goToSlide(1)">
+                Start Interactive Tour ➔
+              </button>
+              <button class="action-btn action-btn-outline" style="padding: 12px 20px; font-size: 1rem;" onclick="goToSlide(5)">
+                Interactive Pricing Tool ₵
+              </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 36px;">
+              <div style="background: rgba(255,255,255,0.06); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 1.6rem; font-weight: 800; color: #fbbf24;">3 mins</div>
+                <div style="font-size: 0.8rem; color: #94a3b8;">Avg. Match Time</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.06); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 1.6rem; font-weight: 800; color: #34d399;">1,240+</div>
+                <div style="font-size: 0.8rem; color: #94a3b8;">Verified Haulers</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.06); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 1.6rem; font-weight: 800; color: #38bdf8;">100%</div>
+                <div style="font-size: 0.8rem; color: #94a3b8;">Mobile Money (MoMo)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Image -->
+          <div class="media-card" style="height: 520px;">
+            <img src="public/presentation/collector.jpg" alt="Borlawura Collector with Tricycle">
+            <div class="media-overlay">
+              <div class="media-title">Empowered Local Haulers</div>
+              <div class="media-desc">Verified electric tricycle collectors serving residential & commercial neighborhoods across Accra and Tema.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 1: The Problem & Opportunity -->
+      <section class="slide" id="slide-1">
+        <div class="slide-header">
+          <span class="slide-badge">MARKET CONTEXT & CHALLENGE</span>
+          <h2 class="slide-title">Transforming Urban Waste Management in Ghana</h2>
+          <p class="slide-subtitle">Overcoming municipal collection gaps, uncontrolled burning, and informal sector friction</p>
+        </div>
+
+        <div class="grid-2">
+          <!-- The Problem -->
+          <div class="deck-card" style="background: #fff5f5; border-color: #fecaca;">
+            <span style="font-size: 0.75rem; font-weight: 800; color: #dc2626; letter-spacing: 0.08em; text-transform: uppercase;">
+              CURRENT BOTTLENECKS
+            </span>
+            <h3 style="font-size: 1.4rem; color: #991b1b; margin-top: 6px; font-weight: 700;">Urban Waste Failure Points</h3>
+            <ul style="margin-top: 16px; list-style: none; display: flex; flex-direction: column; gap: 14px;">
+              <li style="display: flex; gap: 10px; font-size: 0.95rem; color: #475569;">
+                <span style="color: #dc2626; font-weight: bold;">✕</span>
+                <div><strong>Irregular Municipal Rounds:</strong> Households wait weeks for trash trucks, resulting in roadside piles and gutter blockages.</div>
+              </li>
+              <li style="display: flex; gap: 10px; font-size: 0.95rem; color: #475569;">
+                <span style="color: #dc2626; font-weight: bold;">✕</span>
+                <div><strong>Arbitrary Cash Pricing:</strong> Informal "aboboyaa" tricycle operators charge fluctuating, opaque prices without receipts.</div>
+              </li>
+              <li style="display: flex; gap: 10px; font-size: 0.95rem; color: #475569;">
+                <span style="color: #dc2626; font-weight: bold;">✕</span>
+                <div><strong>Toxic Open Air Burning:</strong> Frustrated residents burn mixed plastics in neighborhood backyards, emitting carcinogens.</div>
+              </li>
+              <li style="display: flex; gap: 10px; font-size: 0.95rem; color: #475569;">
+                <span style="color: #dc2626; font-weight: bold;">✕</span>
+                <div><strong>Wasted Hauler Mileage:</strong> Collectors spend up to 40% of their workday roaming streets looking for jobs.</div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- The Solution -->
+          <div class="deck-card card-highlight" style="background: #f0fdf4; border-color: #bbf7d0;">
+            <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary); letter-spacing: 0.08em; text-transform: uppercase;">
+              THE BORLAWURA PLATFORM
+            </span>
+            <h3 style="font-size: 1.4rem; color: var(--primary-dark); margin-top: 6px; font-weight: 700;">Digital Reverse Logistics</h3>
+            <ul style="margin-top: 16px; list-style: none; display: flex; flex-direction: column; gap: 14px;">
+              <li style="display: flex; gap: 10px; font-size: 0.95rem; color: #334155;">
+                <span style="color: var(--primary); font-weight: bold;">✔</span>
+                <div><strong>Uber-Style On-Demand Dispatch:</strong> Live algorithmic assignment based on GPS proximity, waste volume, and vehicle type.</div>
+              </li>
+              <li style="display: flex; gap: 10px; font-size: 0.95rem; color: #334155;">
+                <span style="color: var(--primary); font-weight: bold;">✔</span>
+                <div><strong>Transparent Cedi (₵) Tariffs:</strong> Upfront pricing breakdown based on distance, waste stream, volume, and urgency.</div>
+              </li>
+              <li style="display: flex; gap: 10px; font-size: 0.95rem; color: #334155;">
+                <span style="color: var(--primary); font-weight: bold;">✔</span>
+                <div><strong>Photo Proof of Custody:</strong> Before and after photos ensure verified disposal, preventing illegal dumping.</div>
+              </li>
+              <li style="display: flex; gap: 10px; font-size: 0.95rem; color: #334155;">
+                <span style="color: var(--primary); font-weight: bold;">✔</span>
+                <div><strong>Cashless Mobile Money Engine:</strong> MTN MoMo, Telecel Cash, and AirtelTigo integration for instant, secure transactions.</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: Customer App Experience -->
+      <section class="slide" id="slide-2">
+        <div class="slide-header">
+          <span class="slide-badge">CUSTOMER APP EXPERIENCE</span>
+          <h2 class="slide-title">“Snap it. Request it. It’s gone.”</h2>
+          <p class="slide-subtitle">A seamless 3-step pickup request journey on mobile and web</p>
+        </div>
+
+        <div class="grid-2">
+          <!-- Left: 3-Step Interactive Timeline -->
+          <div class="deck-card">
+            <div class="timeline-tabs" id="customerStages">
+              <div class="t-tab active" onclick="setCustomerStage(0)">1. Snap it</div>
+              <div class="t-tab" onclick="setCustomerStage(1)">2. Request it</div>
+              <div class="t-tab" onclick="setCustomerStage(2)">3. Track & Gone</div>
+            </div>
+
+            <div id="customerStageContent" class="stage-card" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+              <h4 id="cStageTitle" style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">Photo Upload & Waste Stream</h4>
+              <p id="cStageDesc" style="margin-top: 8px; font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+                Take up to 3 photos of the waste pile. Select waste category: <strong>Plastic, Organic, Mixed, or E-Waste</strong>. Choose quantity tier: Small Bag, Sack (1.6x), or Standard Bin (2.4x).
+              </p>
+              <div id="cStageList" style="margin-top: 14px; font-size: 0.88rem; color: var(--text-main); line-height: 1.8;">
+                • AI photo verification reduces misclassification disputes<br>
+                • Clear sorting guidelines for recyclable plastics vs food organics<br>
+                • Real-time volume scaling for appropriate vehicle dispatch
+              </div>
+            </div>
+
+            <div style="margin-top: 18px; display: flex; gap: 10px;">
+              <a href="https://encryption-nonce-technology.github.io/Borlawura/customer/request" target="_blank" class="action-btn action-btn-primary" style="flex: 1; justify-content: center;">
+                Launch Request Flow Live ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- Right: Customer App Photo -->
+          <div class="media-card" style="height: 500px;">
+            <img src="public/presentation/customer.jpg" alt="Customer using Borlawura Mobile App in Accra">
+            <div class="media-overlay">
+              <div class="media-title">Intuitive Mobile-First Design</div>
+              <div class="media-desc">Households request verified collectors in Osu, East Legon, Tema, and Madina with live GPS maps.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: Collector Driver App -->
+      <section class="slide" id="slide-3">
+        <div class="slide-header">
+          <span class="slide-badge">COLLECTOR DRIVER APP</span>
+          <h2 class="slide-title">Empowering Haulers & Micro-Entrepreneurs</h2>
+          <p class="slide-subtitle">Turn-by-turn navigation, photo verification, and guaranteed same-day Mobile Money cashouts</p>
+        </div>
+
+        <div class="grid-2">
+          <!-- Left: Hauler Photo -->
+          <div class="media-card" style="height: 500px;">
+            <img src="public/presentation/collector.jpg" alt="Borlawura Collector with Tricycle">
+            <div class="media-overlay">
+              <div class="media-title">Dignified Green Jobs</div>
+              <div class="media-desc">Providing safety equipment, verified identities, and predictable daily earnings for urban waste workers.</div>
+            </div>
+          </div>
+
+          <!-- Right: Features List -->
+          <div class="deck-card card-gold">
+            <h3 style="font-size: 1.35rem; color: var(--primary-dark); font-weight: 700;">Key Collector Capabilities</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+              <div style="background: var(--bg-light); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-weight: 700; color: var(--gold); font-size: 0.95rem;">⚡ Proximity Job Broadcast & Urgency Alert</div>
+                <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">
+                  1-tap Online/Offline toggle. Broadcast shows customer pickup address, waste photos, distance, and net payout in ₵ before accepting.
+                </div>
+              </div>
+
+              <div style="background: var(--bg-light); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-weight: 700; color: var(--primary); font-size: 0.95rem;">📍 Integrated Turn-by-Turn Navigation</div>
+                <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">
+                  Milestones: <em>Start Route → Arrived → Start Collection</em>. Includes direct 1-tap phone dialer for customer gate coordination.
+                </div>
+              </div>
+
+              <div style="background: var(--bg-light); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-weight: 700; color: #0284c7; font-size: 0.95rem;">📸 Mandatory After-Photo Verification</div>
+                <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">
+                  Job completion requires photo proof of the cleared site, unlocking escrow payment and protecting collectors against false complaints.
+                </div>
+              </div>
+
+              <div style="background: var(--bg-light); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-weight: 700; color: var(--primary-dark); font-size: 0.95rem;">💰 Instant Mobile Money Wallet</div>
+                <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">
+                  Earnings credit instantly upon job completion. Withdraw directly to MTN MoMo, Telecel Cash, or AirtelTigo with zero bank fees.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: Admin Operations CMS -->
+      <section class="slide" id="slide-4">
+        <div class="slide-header">
+          <span class="slide-badge">ADMIN OPERATIONS COMMAND CENTER</span>
+          <h2 class="slide-title">Fleet Command Center & Governance CMS</h2>
+          <p class="slide-subtitle">Desktop-grade operations portal for municipal fleet monitoring, KYC verification, and finance</p>
+        </div>
+
+        <div class="grid-2">
+          <!-- Left: 5 Modules -->
+          <div class="deck-card">
+            <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--text-main);">Enterprise Management Modules</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="background: #e0f2fe; color: #0284c7; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">1</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.95rem;">Live City Operations Map</div>
+                  <div style="font-size: 0.85rem; color: var(--text-muted);">Real-time GIS map displaying active pickups, fleet clusters, and SOS priority alerts.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="background: #fef3c7; color: #b45309; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">2</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.95rem;">Collector KYC & Onboarding Pipeline</div>
+                  <div style="font-size: 0.85rem; color: var(--text-muted);">Automated review of Ghana Card IDs, driver licences, and tricycle roadworthiness certificates.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="background: #dcfce7; color: #15803d; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">3</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.95rem;">Finance Ledger & Withdrawal Queue</div>
+                  <div style="font-size: 0.85rem; color: var(--text-muted);">Reconciliation for all incoming customer MoMo payments and collector payout approvals.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="background: #f1f5f9; color: #475569; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">4</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.95rem;">Dynamic Tariff & Content Management</div>
+                  <div style="font-size: 0.85rem; color: var(--text-muted);">Adjust base tariffs, per-km fees, and promotional community codes without code deployments.</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+              <a href="https://encryption-nonce-technology.github.io/Borlawura/admin/login" target="_blank" class="action-btn action-btn-primary" style="width: 100%; justify-content: center;">
+                Open Admin Portal Demo ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- Right: Admin Ops Photo -->
+          <div class="media-card" style="height: 500px;">
+            <img src="public/presentation/admin.jpg" alt="Borlawura Admin Operations Center in Accra">
+            <div class="media-overlay">
+              <div class="media-title">Real-Time Municipal Fleet Monitoring</div>
+              <div class="media-desc">Operations room in Accra tracking live pickup dispatch and collector route telemetry.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: Interactive Pricing Calculator Widget -->
+      <section class="slide" id="slide-5">
+        <div class="slide-header">
+          <span class="slide-badge">INTERACTIVE SIMULATION</span>
+          <h2 class="slide-title">Interactive Tariff & Pricing Calculator</h2>
+          <p class="slide-subtitle">Test how Borlawura's dynamic tariff algorithm calculates customer pricing and collector payouts in Ghana Cedis (₵)</p>
+        </div>
+
+        <div class="grid-2">
+          <!-- Live Interactive Calculator -->
+          <div class="calc-box">
+            <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Configure Pickup Parameters</h4>
+
+            <!-- Waste Type -->
+            <div class="calc-row">
+              <div class="calc-label">
+                <span>Waste Stream Category</span>
+                <span id="labelMultiplier" class="calc-val-highlight">Plastic (1.1x)</span>
+              </div>
+              <div class="btn-group" id="wasteTypeBtns">
+                <button class="toggle-chip active" onclick="setWasteType('plastic', 1.1, 'Plastic (1.1x)')">Plastic</button>
+                <button class="toggle-chip" onclick="setWasteType('organic', 1.0, 'Organic (1.0x)')">Organic</button>
+                <button class="toggle-chip" onclick="setWasteType('mixed', 1.2, 'Mixed (1.2x)')">Mixed</button>
+                <button class="toggle-chip" onclick="setWasteType('ewaste', 1.5, 'E-Waste (1.5x)')">E-Waste</button>
+              </div>
+            </div>
+
+            <!-- Volume Quantity -->
+            <div class="calc-row">
+              <div class="calc-label">
+                <span>Quantity Volume</span>
+                <span id="labelVolume" class="calc-val-highlight">Sack (1.6x)</span>
+              </div>
+              <div class="btn-group" id="volumeBtns">
+                <button class="toggle-chip" onclick="setVolume('small', 1.0, 'Small Bag (1.0x)')">Small Bag</button>
+                <button class="toggle-chip active" onclick="setVolume('sack', 1.6, 'Sack (1.6x)')">Sack</button>
+                <button class="toggle-chip" onclick="setVolume('bin', 2.4, 'Standard Bin (2.4x)')">Standard Bin</button>
+              </div>
+            </div>
+
+            <!-- Distance Slider -->
+            <div class="calc-row">
+              <div class="calc-label">
+                <span>Pickup Hauler Distance</span>
+                <span id="labelDistance" class="calc-val-highlight">3.5 km</span>
+              </div>
+              <input type="range" min="0.5" max="15" step="0.5" value="3.5" class="range-slider" id="distSlider" oninput="updateDistance(this.value)">
+            </div>
+
+            <!-- Add-ons -->
+            <div class="calc-row" style="margin-top: 10px;">
+              <div class="calc-label">Optional Add-ons</div>
+              <div style="display: flex; gap: 10px;">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
+                  <input type="checkbox" id="checkSos" onchange="recalculatePrice()" style="accent-color: var(--primary);">
+                  SOS Urgent (+₵10.00)
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
+                  <input type="checkbox" id="checkCommunity" onchange="recalculatePrice()" style="accent-color: var(--primary);">
+                  Community Code (-12%)
+                </label>
+              </div>
+            </div>
+
+            <!-- Output Card -->
+            <div class="price-display-card">
+              <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.9;">Total Pickup Price</div>
+              <div class="price-total" id="calcTotalPrice">GH₵ 32.75</div>
+              <div class="price-breakdown-list">
+                <div>Base: <strong id="bdBase">₵15.00</strong></div>
+                <div>Volume: <strong id="bdVol">₵9.00</strong></div>
+                <div>Dist: <strong id="bdDist">₵8.75</strong></div>
+                <div>Collector Payout: <strong id="bdCollector">₵26.20</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formula & Business Model Explanation -->
+          <div class="deck-card card-highlight">
+            <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--text-main);">Marketplace Unit Economics</h3>
+            <p style="font-size: 0.92rem; color: var(--text-muted); margin-top: 6px; line-height: 1.5;">
+              Borlawura charges a fair take-rate while guaranteeing informal collectors significantly higher hourly take-home pay than uncoordinated street hauling.
+            </p>
+
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 14px;">
+              <div style="background: var(--bg-light); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-weight: 700; color: var(--primary); font-size: 0.95rem;">1. Platform Commission (15% - 20%)</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 3px;">
+                  Automatically withheld at collection completion before the balance is disbursed to the collector's wallet.
+                </div>
+              </div>
+
+              <div style="background: var(--bg-light); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-weight: 700; color: var(--gold); font-size: 0.95rem;">2. Recurring Scheduled Subscriptions</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 3px;">
+                  Weekly and monthly subscription packages for gated residential communities and commercial storefronts.
+                </div>
+              </div>
+
+              <div style="background: var(--bg-light); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-weight: 700; color: #0284c7; font-size: 0.95rem;">3. Recyclable Materials Aggregation</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 3px;">
+                  Aggregating pure PET plastics and e-waste for bulk resale to certified domestic and international recycling processors.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: ESG Sustainability & Circular Economy -->
+      <section class="slide" id="slide-6">
+        <div class="slide-header">
+          <span class="slide-badge">ESG & ENVIRONMENTAL SUSTAINABILITY</span>
+          <h2 class="slide-title">Building Cleaner, Flood-Resilient Communities</h2>
+          <p class="slide-subtitle">Aligning environmental sustainability, climate resilience, and socioeconomic empowerment</p>
+        </div>
+
+        <div class="grid-2">
+          <!-- Left: ESG Pillars -->
+          <div class="deck-card card-highlight">
+            <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--text-main);">Three Dimensions of Impact</h3>
+            
+            <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 14px;">
+              <div style="background: #f0fdf4; padding: 14px; border-radius: 12px; border: 1px solid #bbf7d0;">
+                <div style="font-weight: 700; color: var(--primary); font-size: 0.95rem;">🌿 Environmental: Zero Burning & Flood Mitigation</div>
+                <div style="font-size: 0.85rem; color: #334155; margin-top: 4px;">
+                  Sorting recyclables prevents open incineration in residential neighborhoods and stops plastic debris from choking Accra's Odaw drainage basin during tropical rains.
+                </div>
+              </div>
+
+              <div style="background: #fefce8; padding: 14px; border-radius: 12px; border: 1px solid #fef08a;">
+                <div style="font-weight: 700; color: var(--gold); font-size: 0.95rem;">🤝 Social: Dignified Green Livelihoods</div>
+                <div style="font-size: 0.85rem; color: #334155; margin-top: 4px;">
+                  Informal waste pickers transition from hazardous scavengers into recognized, equipped municipal logistics partners with verifiable digital banking records.
+                </div>
+              </div>
+
+              <div style="background: #f0f9ff; padding: 14px; border-radius: 12px; border: 1px solid #bae6fd;">
+                <div style="font-weight: 700; color: #0284c7; font-size: 0.95rem;">🏛 Governance: Municipal Waste Heatmaps</div>
+                <div style="font-size: 0.85rem; color: #334155; margin-top: 4px;">
+                  High-resolution collection data provides municipal assemblies (AMA, TMA) with unprecedented visibility into waste hot spots for smarter city planning.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Community Impact Photo -->
+          <div class="media-card" style="height: 500px;">
+            <img src="public/presentation/impact.jpg" alt="Community Recycling & Cleanliness Initiative in Accra Ghana">
+            <div class="media-overlay">
+              <div class="media-title">Community Segregation at Source</div>
+              <div class="media-desc">Color-coded bins and organized neighborhood collections in Ghanaian communities.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: Roadmap & Vision -->
+      <section class="slide dark-theme" id="slide-7">
+        <div class="slide-header">
+          <span class="slide-badge">STRATEGIC VISION</span>
+          <h2 class="slide-title">The Roadmap: Scaling Circular Waste in West Africa</h2>
+          <p class="slide-subtitle">From Accra city pilot to the premier reverse-logistics infrastructure in the region</p>
+        </div>
+
+        <div class="grid-3" style="margin-top: 10px;">
+          <div class="deck-card" style="background: #1e293b; border-color: var(--primary);">
+            <span style="color: var(--primary); font-size: 0.8rem; font-weight: 800; text-transform: uppercase;">PHASE 1 (CURRENT)</span>
+            <h4 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 6px;">Greater Accra & Tema Rollout</h4>
+            <ul style="margin-top: 14px; font-size: 0.85rem; color: #cbd5e1; list-style: none; display: flex; flex-direction: column; gap: 8px;">
+              <li>✔ Map-first customer app live with MoMo checkout</li>
+              <li>✔ Collector driver app with photo proof verification</li>
+              <li>✔ Operations, finance, and KYC admin dashboard</li>
+              <li>✔ Coverage: Osu, East Legon, Madina, Adenta, Tema</li>
+            </ul>
+          </div>
+
+          <div class="deck-card" style="background: #1e293b; border-color: var(--gold);">
+            <span style="color: var(--gold); font-size: 0.8rem; font-weight: 800; text-transform: uppercase;">PHASE 2 (H2 EXPANSION)</span>
+            <h4 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 6px;">Regional Cities & Recyclers</h4>
+            <ul style="margin-top: 14px; font-size: 0.85rem; color: #cbd5e1; list-style: none; display: flex; flex-direction: column; gap: 8px;">
+              <li>• Native iOS and Android mobile app distribution</li>
+              <li>• Direct partnerships with plastic buy-back recycling depots</li>
+              <li>• B2B corporate contracts for restaurants and hotels</li>
+              <li>• Geographic expansion to Kumasi, Takoradi & Cape Coast</li>
+            </ul>
+          </div>
+
+          <div class="deck-card" style="background: #1e293b; border-color: #38bdf8;">
+            <span style="color: #38bdf8; font-size: 0.8rem; font-weight: 800; text-transform: uppercase;">PHASE 3 (LONG TERM)</span>
+            <h4 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 6px;">Regional Circular Economy</h4>
+            <ul style="margin-top: 14px; font-size: 0.85rem; color: #cbd5e1; list-style: none; display: flex; flex-direction: column; gap: 8px;">
+              <li>• Computer vision for automatic waste volume appraisal</li>
+              <li>• Tokenized green credit rewards for sorting households</li>
+              <li>• Corporate ESG carbon offset verification APIs</li>
+              <li>• Expansion into Nigeria, Côte d'Ivoire & Kenya</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="margin-top: 32px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 18px 24px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 700; font-size: 1.1rem; color: #fff;">Experience Borlawura in Action</div>
+            <div style="font-size: 0.85rem; color: #94a3b8;">Explore the live deployed product or inspect the management command center.</div>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <a href="https://encryption-nonce-technology.github.io/Borlawura/" target="_blank" class="action-btn action-btn-primary" style="padding: 10px 20px;">
+              Launch Live App ↗
+            </a>
+            <a href="https://encryption-nonce-technology.github.io/Borlawura/admin/login" target="_blank" class="action-btn action-btn-outline" style="padding: 10px 20px;">
+              Admin Operations Portal ↗
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Controls & Slide Dots -->
+    <footer class="deck-footer">
+      <div class="footer-arrows">
+        <button class="nav-arrow-btn" onclick="prevSlide()" title="Previous slide (←)">‹</button>
+        <button class="nav-arrow-btn" onclick="nextSlide()" title="Next slide (→)">›</button>
+        <span style="margin-left: 10px;" id="slideCounter">Slide 1 of 8</span>
+      </div>
+
+      <div class="slide-dots" id="slideDots">
+        <span class="slide-dot active" onclick="goToSlide(0)"></span>
+        <span class="slide-dot" onclick="goToSlide(1)"></span>
+        <span class="slide-dot" onclick="goToSlide(2)"></span>
+        <span class="slide-dot" onclick="goToSlide(3)"></span>
+        <span class="slide-dot" onclick="goToSlide(4)"></span>
+        <span class="slide-dot" onclick="goToSlide(5)"></span>
+        <span class="slide-dot" onclick="goToSlide(6)"></span>
+        <span class="slide-dot" onclick="goToSlide(7)"></span>
+      </div>
+
+      <div>
+        <span>Keyboard: Use <strong>← / →</strong> or <strong>Space</strong></span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const totalSlides = 8;
+
+    function updateDeck() {
+      // Update slides
+      document.querySelectorAll('.slide').forEach((s, idx) => {
+        s.classList.toggle('active', idx === currentSlide);
+      });
+
+      // Update nav tabs
+      document.querySelectorAll('.nav-tab').forEach((t, idx) => {
+        t.classList.toggle('active', idx === currentSlide);
+      });
+
+      // Update dots
+      document.querySelectorAll('.slide-dot').forEach((d, idx) => {
+        d.classList.toggle('active', idx === currentSlide);
+      });
+
+      // Counter
+      document.getElementById('slideCounter').innerText = `Slide ${currentSlide + 1} of ${totalSlides}`;
+    }
+
+    function goToSlide(n) {
+      if (n >= 0 && n < totalSlides) {
+        currentSlide = n;
+        updateDeck();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateDeck();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateDeck();
+      }
+    }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullScreen();
+      }
+    });
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Customer App Stage Switcher (Slide 2)
+    const customerStages = [
+      {
+        title: "Photo Upload & Waste Classification",
+        desc: "Snap up to 3 photos of the waste pile. Select waste stream: Plastic, Organic, Mixed, or E-Waste. Choose volume tier: Small Bag, Sack (1.6x), or Standard Bin (2.4x).",
+        list: [
+          "• High-resolution photo preview minimizes ambiguity before dispatch",
+          "• Clear segregation incentives for clean recyclable plastics vs compost organics",
+          "• Upfront capacity checks guarantee the right vehicle (tricycle vs truck) arrives"
+        ]
+      },
+      {
+        title: "GPS Location Pinning & Upfront Pricing",
+        desc: "Pin your exact pickup address in Osu, East Legon, Madina, Adenta, Tema, or Kumasi. The algorithm calculates the transparent fee in Ghana Cedis (₵).",
+        list: [
+          "• Live map pinpointing with satellite & road overlays",
+          "• Transparent tariff calculation: Base Fee + Volume + Distance + Add-ons",
+          "• Select cashless Mobile Money method: MTN MoMo, Telecel Cash, or AirtelTigo"
+        ]
+      },
+      {
+        title: "Live GPS Tracking & Photo Proof Verification",
+        desc: "Watch the assigned hauler approach your location in real time on the live map. Receive instant notifications when the hauler arrives.",
+        list: [
+          "• Driver details: verified KYC badge, vehicle type, rating, and ETA countdown",
+          "• Mandatory 'After Photo' proof submitted upon completion to verify clean premises",
+          "• Instant digital receipt, voluntary collector tipping, and 5-star review"
+        ]
+      }
+    ];
+
+    function setCustomerStage(idx) {
+      document.querySelectorAll('#customerStages .t-tab').forEach((t, i) => {
+        t.classList.toggle('active', i === idx);
+      });
+      const data = customerStages[idx];
+      document.getElementById('cStageTitle').innerText = data.title;
+      document.getElementById('cStageDesc').innerText = data.desc;
+      document.getElementById('cStageList').innerHTML = data.list.join('<br>');
+    }
+
+    // Pricing Calculator State (Slide 5)
+    let calcState = {
+      wasteMultiplier: 1.1,
+      wasteLabel: 'Plastic (1.1x)',
+      volumeMultiplier: 1.6,
+      volumeLabel: 'Sack (1.6x)',
+      distanceKm: 3.5,
+      baseFee: 15.00,
+      perKm: 2.50
+    };
+
+    function setWasteType(type, multiplier, label) {
+      calcState.wasteMultiplier = multiplier;
+      calcState.wasteLabel = label;
+      document.getElementById('labelMultiplier').innerText = label;
+      
+      const btns = document.querySelectorAll('#wasteTypeBtns .toggle-chip');
+      btns.forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      recalculatePrice();
+    }
+
+    function setVolume(type, multiplier, label) {
+      calcState.volumeMultiplier = multiplier;
+      calcState.volumeLabel = label;
+      document.getElementById('labelVolume').innerText = label;
+
+      const btns = document.querySelectorAll('#volumeBtns .toggle-chip');
+      btns.forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      recalculatePrice();
+    }
+
+    function updateDistance(km) {
+      calcState.distanceKm = parseFloat(km);
+      document.getElementById('labelDistance').innerText = `${calcState.distanceKm.toFixed(1)} km`;
+      recalculatePrice();
+    }
+
+    function recalculatePrice() {
+      const base = calcState.baseFee;
+      const wasteCharge = (base * calcState.wasteMultiplier * calcState.volumeMultiplier) - base;
+      const distCharge = calcState.distanceKm * calcState.perKm;
+      
+      let subtotal = base + wasteCharge + distCharge;
+
+      const isSos = document.getElementById('checkSos').checked;
+      const isCommunity = document.getElementById('checkCommunity').checked;
+
+      if (isSos) subtotal += 10.00;
+      if (isCommunity) subtotal *= 0.88;
+
+      const collectorShare = subtotal * 0.80; // 80% to collector
+
+      document.getElementById('calcTotalPrice').innerText = `GH₵ ${subtotal.toFixed(2)}`;
+      document.getElementById('bdBase').innerText = `₵${base.toFixed(2)}`;
+      document.getElementById('bdVol').innerText = `₵${wasteCharge.toFixed(2)}`;
+      document.getElementById('bdDist').innerText = `₵${distCharge.toFixed(2)}`;
+      document.getElementById('bdCollector').innerText = `₵${collectorShare.toFixed(2)}`;
+    }
+
+    // Initial calculation
+    recalculatePrice();
+  </script>
+</body>
+</html>
